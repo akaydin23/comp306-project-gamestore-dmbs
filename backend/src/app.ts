@@ -6,6 +6,7 @@ import errorHandler from './middleware/errorHandler.js';
 const app: Express = express();
 
 app.use(cors());
+app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
 app.use('/api', routes);
