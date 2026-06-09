@@ -9,25 +9,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const token = localStorage.getItem('token')
-    if (!token) return
+    if (!token) {
+      setIsLoading(false)
+      return
+    }
 
     authApi
       .getMe()
       .then((res) => setUser(res.user))
-      .catch(() => localStorage.removeItem('token'))
+      .catch(() => {
+        localStorage.removeItem('token')
+        setUser(null)
+      })
       .finally(() => setIsLoading(false))
   }, [])
 
   const login = useCallback(async (email: string, password: string) => {
-    const res = await authApi.login(email, password)
+    const res = await authApi.login(email.trim(), password)
     localStorage.setItem('token', res.token)
     setUser(res.user)
   }, [])
 
   const register = useCallback(
     async (username: string, email: string, password: string) => {
-      const res = await authApi.register(username, email, password)
-      setUser(res.user)
+      await authApi.register(username.trim(), email.trim(), password)
     },
     [],
   )

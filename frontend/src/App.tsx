@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider } from './context/AuthContext'
 import { useAuth } from './context/useAuth'
 import ProtectedRoute from './components/ProtectedRoute'
+import HomePage from './pages/HomePage'
 import LoginPage from './pages/LoginPage'
 import RegisterPage from './pages/RegisterPage'
 import DashboardPage from './pages/DashboardPage'
@@ -22,6 +23,24 @@ function PublicRoute({ children }: { children: React.ReactNode }) {
   }
 
   return <>{children}</>
+}
+
+function RootRoute() {
+  const { isAuthenticated, isLoading } = useAuth()
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-1 items-center justify-center">
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-accent border-t-transparent" />
+      </div>
+    )
+  }
+
+  if (isAuthenticated) {
+    return <DashboardPage />
+  }
+
+  return <HomePage />
 }
 
 function App() {
@@ -47,6 +66,10 @@ function App() {
           />
           <Route
             path="/"
+            element={<RootRoute />}
+          />
+          <Route
+            path="/dashboard"
             element={
               <ProtectedRoute>
                 <DashboardPage />
