@@ -14,3 +14,31 @@ export interface JwtPayload {
   username: string;
   role: string;
 }
+
+export interface GameFilters {
+  search?: string;
+  genre?: string;
+  minPrice?: number;
+  maxPrice?: number;
+  sort?: string;
+}
+
+export interface GameSummary {
+  game_id: number;
+  name: string;
+  description: string | null;
+  price: string;
+  developer_user_id: number | null;
+  studio_name: string | null;
+  release_date: string | null;
+  cover_image_url: string | null;
+  genres: string[] | null;
+  average_rating: string | null;
+  review_count: string;
+  wishlist_count: string;
+}
+
+export interface Genre {
+  genre_id: number;
+  genre_name: string;
+}
