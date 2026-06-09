@@ -1,12 +1,12 @@
 -- Users
-INSERT INTO Users (username, email, password_hash, bio, role)
+INSERT INTO Users (username, email, password_hash, bio, profile_image_url, role)
 VALUES
-('taha', 'taha@test.com', 'sigma67_lover', 'Indie sloper', 'USER'),
-('emren', 'emren@test.com', 'womenfearme', 'Hi guys!', 'DEVELOPER'),
-('joel', 'joel@test.com', 'frontendfull', 'Admin of this page', 'ADMIN'),
-('berk', 'berk@test.com', 'helloguys', 'I like puzzles', 'USER'),
-('ömer', 'ömer@test.com', 'ilvposgre', 'I hope I will never study again', 'USER'),
-('ali', 'ali@test.com', 'JaxLover', 'I love bbno$', 'USER');
+('Taha', 'taha@test.com', 'sigma67_lover', 'Indie sloper', 'Taha.jpg', 'USER'),
+('Emren', 'emren@test.com', 'womenfearme', 'Hi guys!', 'Emren.jpg', 'DEVELOPER'),
+('Joel', 'joel@test.com', 'frontendfull', 'Admin of this page', 'Joel.jpg', 'ADMIN'),
+('Berk', 'berk@test.com', 'helloguys', 'I like puzzles', 'Berk.jpg', 'USER'),
+('Ömer', 'ömer@test.com', 'ilvposgre', 'I hope I will never study again', 'Ömer.jpg', 'USER'),
+('Ali', 'ali@test.com', 'JaxLover', 'I love bbno$', 'Ali.jpg', 'USER');
 
 -- DeveloperProfiles
 INSERT INTO DeveloperProfiles (user_id, studio_name)
