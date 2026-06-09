@@ -24,7 +24,7 @@ CREATE TABLE Games (
     price DECIMAL(10, 2) NOT NULL,
     developer_user_id INT,
     release_date DATE,
-
+    cover_image_url VARCHAR(255),
     CHECK (price >= 0),
 
     FOREIGN KEY (developer_user_id) REFERENCES DeveloperProfiles(user_id)
