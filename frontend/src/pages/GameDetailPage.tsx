@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { Button, Card, Chip, Spinner } from '@heroui/react'
 import { getGameById, getLibrary } from '../api/games'
 import { useAuth } from '../context/useAuth'
+import { useCart } from '../context/useCart'
 import type { Game } from '../types'
 
 const TAG_COLORS: Record<string, string> = {
@@ -53,6 +54,7 @@ export default function GameDetailPage() {
   const { gameId } = useParams<{ gameId: string }>()
   const navigate = useNavigate()
   const { isAuthenticated } = useAuth()
+  const { isInCart, addToCart } = useCart()
 
   const [game, setGame] = useState<Game | null>(null)
   const [loading, setLoading] = useState(true)
@@ -189,10 +191,23 @@ export default function GameDetailPage() {
               <Button variant="secondary" className="ml-auto">
                 Play
               </Button>
+            ) : isInCart(game.game_id) ? (
+              <Button variant="ghost" isDisabled>
+                In Cart
+              </Button>
             ) : (
               <>
                 <span className="detail-price">{formatPrice(game.price)}</span>
-                <Button variant="secondary">
+                <Button
+                  variant="secondary"
+                  onPress={() => {
+                    if (isAuthenticated) {
+                      addToCart(game.game_id)
+                    } else {
+                      navigate('/login')
+                    }
+                  }}
+                >
                   Add to Cart
                 </Button>
               </>

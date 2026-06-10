@@ -1,13 +1,15 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider } from './context/AuthContext'
+import { CartProvider } from './context/CartContext'
 import { useAuth } from './context/useAuth'
 import ProtectedRoute from './components/ProtectedRoute'
 import AppLayout from './components/AppLayout'
 import LoginPage from './pages/LoginPage'
 import RegisterPage from './pages/RegisterPage'
 import StorePage from './pages/StorePage'
-import LibraryPage from './pages/LibraryPage'
 import GameDetailPage from './pages/GameDetailPage'
+import LibraryPage from './pages/LibraryPage'
+import CartPage from './pages/CartPage'
 
 function PublicRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isLoading } = useAuth()
@@ -27,42 +29,59 @@ function PublicRoute({ children }: { children: React.ReactNode }) {
   return <>{children}</>
 }
 
+function AppRoutes() {
+  return (
+    <Routes>
+      <Route
+        path="/login"
+        element={
+          <PublicRoute>
+            <LoginPage />
+          </PublicRoute>
+        }
+      />
+      <Route
+        path="/register"
+        element={
+          <PublicRoute>
+            <RegisterPage />
+          </PublicRoute>
+        }
+      />
+      <Route element={<AppLayout />}>
+        <Route index element={<StorePage />} />
+        <Route path="/store" element={<StorePage />} />
+        <Route path="/store/:gameId" element={<GameDetailPage />} />
+        <Route path="/cart" element={<CartPage />} />
+        <Route
+          path="/library"
+          element={
+            <ProtectedRoute>
+              <LibraryPage />
+            </ProtectedRoute>
+          }
+        />
+      </Route>
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
+  )
+}
+
+function AppInner() {
+  const { isAuthenticated } = useAuth()
+
+  return (
+    <CartProvider key={String(isAuthenticated)}>
+      <AppRoutes />
+    </CartProvider>
+  )
+}
+
 function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <Routes>
-          <Route
-            path="/login"
-            element={
-              <PublicRoute>
-                <LoginPage />
-              </PublicRoute>
-            }
-          />
-          <Route
-            path="/register"
-            element={
-              <PublicRoute>
-                <RegisterPage />
-              </PublicRoute>
-            }
-          />
-          <Route element={<AppLayout />}>
-            <Route index element={<StorePage />} />
-            <Route path="/store" element={<StorePage />} />
-            <Route path="/store/:gameId" element={<GameDetailPage />} />
-            <Route
-              path="/library"
-              element={
-                <ProtectedRoute>
-                  <LibraryPage />
-                </ProtectedRoute>
-              }
-            />
-          </Route>
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
+        <AppInner />
       </AuthProvider>
     </BrowserRouter>
   )

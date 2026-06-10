@@ -1,5 +1,7 @@
 import { Card, Chip, Button } from '@heroui/react'
-import { Link } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
+import { useAuth } from '../context/useAuth'
+import { useCart } from '../context/useCart'
 import type { Game } from '../types'
 
 type GameCardProps =
@@ -45,6 +47,9 @@ function formatPrice(price: number) {
 
 export default function GameCard(props: GameCardProps) {
   const { game, variant } = props
+  const { isAuthenticated } = useAuth()
+  const { isInCart, addToCart } = useCart()
+  const navigate = useNavigate()
 
   const gradientIndex = game.game_id % 6
   const gradients = [
@@ -57,6 +62,7 @@ export default function GameCard(props: GameCardProps) {
   ]
 
   const genres = game.genres ?? []
+  const inCart = isInCart(game.game_id)
 
   return (
     <Card className="game-card">
@@ -89,9 +95,26 @@ export default function GameCard(props: GameCardProps) {
             <span className="game-card-price">
               {formatPrice(game.price)}
             </span>
-            <Button className="game-card-cart-btn" size="sm" variant="secondary">
-              Add to Cart
-            </Button>
+            {inCart ? (
+              <Button className="game-card-cart-btn" size="sm" variant="ghost" isDisabled>
+                In Cart
+              </Button>
+            ) : (
+              <Button
+                className="game-card-cart-btn"
+                size="sm"
+                variant="secondary"
+                onPress={() => {
+                  if (isAuthenticated) {
+                    addToCart(game.game_id)
+                  } else {
+                    navigate('/login')
+                  }
+                }}
+              >
+                Add to Cart
+              </Button>
+            )}
           </div>
         ) : (
           <div className="game-card-actions">

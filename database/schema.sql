@@ -94,6 +94,29 @@ CREATE TABLE PurchaseItems (
         ON DELETE RESTRICT
 );
 
+CREATE TABLE Carts (
+    cart_id SERIAL PRIMARY KEY,
+    user_id INT NOT NULL UNIQUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (user_id) REFERENCES Users(user_id)
+        ON DELETE CASCADE
+);
+
+CREATE TABLE CartItems (
+    cart_id INT NOT NULL,
+    game_id INT NOT NULL,
+    added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    PRIMARY KEY (cart_id, game_id),
+
+    FOREIGN KEY (cart_id) REFERENCES Carts(cart_id)
+        ON DELETE CASCADE,
+
+    FOREIGN KEY (game_id) REFERENCES Games(game_id)
+        ON DELETE RESTRICT
+);
+
 CREATE TABLE Library (
     user_id INT NOT NULL,
     game_id INT NOT NULL,

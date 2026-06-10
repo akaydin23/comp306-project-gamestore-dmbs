@@ -48,3 +48,8 @@ export interface LibraryEntry {
   purchase_date: string | null;
   hours_played: number;
 }
+
+export interface CartItem {
+  game: GameSummary;
+  added_at: string;
+}
