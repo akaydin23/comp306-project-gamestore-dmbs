@@ -26,6 +26,10 @@ export function getGenres(): Promise<{ genres: Genre[] }> {
   return apiFetch('/genres')
 }
 
+export function getGameById(gameId: number): Promise<{ game: Game }> {
+  return apiFetch(`/games/${gameId}`)
+}
+
 export function getLibrary(): Promise<{ library: LibraryEntry[] }> {
   return apiFetch('/library')
 }

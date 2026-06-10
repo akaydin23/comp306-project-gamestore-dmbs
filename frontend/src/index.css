@@ -623,6 +623,105 @@ body {
   margin: 0;
 }
 
+/* Game detail page */
+.detail-back {
+  margin-bottom: 1rem;
+}
+
+.detail-card {
+  overflow: hidden;
+  background: oklch(0.17 0.005 285 / 0.7);
+  border: 1px solid oklch(0.28 0.006 286 / 0.4);
+}
+
+.detail-cover {
+  width: 100%;
+  height: 240px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  position: relative;
+}
+
+.detail-cover-letter {
+  font-size: 6rem;
+  font-weight: 800;
+  color: oklch(1 0 0 / 0.15);
+  user-select: none;
+}
+
+.detail-cover-letter--second {
+  font-size: 4rem;
+  opacity: 0.6;
+}
+
+.detail-body {
+  padding: 1.5rem !important;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.detail-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--foreground);
+  margin: 0;
+  letter-spacing: -0.02em;
+}
+
+.detail-meta-top {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  flex-wrap: wrap;
+}
+
+.detail-sep {
+  color: oklch(0.5 0.005 285);
+}
+
+.detail-rating-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.detail-stars {
+  font-size: 1rem;
+  color: oklch(0.7 0.15 72);
+  letter-spacing: 0.05em;
+}
+
+.detail-genres {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+}
+
+.detail-description {
+  font-size: 0.9375rem;
+  line-height: 1.65;
+  color: var(--muted);
+  margin: 0.25rem 0 0;
+}
+
+.detail-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 0.75rem;
+  margin-top: 0.5rem;
+  border-top: 1px solid oklch(0.28 0.006 286 / 0.4);
+}
+
+.detail-price {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--foreground);
+}
+
 /* Animations */
 @keyframes fadeInUp {
   from {

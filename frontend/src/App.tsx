@@ -7,6 +7,7 @@ import LoginPage from './pages/LoginPage'
 import RegisterPage from './pages/RegisterPage'
 import StorePage from './pages/StorePage'
 import LibraryPage from './pages/LibraryPage'
+import GameDetailPage from './pages/GameDetailPage'
 
 function PublicRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isLoading } = useAuth()
@@ -50,6 +51,7 @@ function App() {
           <Route element={<AppLayout />}>
             <Route index element={<StorePage />} />
             <Route path="/store" element={<StorePage />} />
+            <Route path="/store/:gameId" element={<GameDetailPage />} />
             <Route
               path="/library"
               element={
