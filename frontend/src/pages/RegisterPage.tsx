@@ -127,7 +127,7 @@ export default function RegisterPage() {
             </div>
           </Card.Content>
 
-          <Card.Footer className="auth-form-footer">
+          <Card.Footer className="auth-form-footer mt-8">
             <Button
               className="auth-submit"
               isDisabled={

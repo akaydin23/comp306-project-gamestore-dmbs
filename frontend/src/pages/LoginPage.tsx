@@ -77,7 +77,7 @@ export default function LoginPage() {
             </div>
           </Card.Content>
 
-          <Card.Footer className="auth-form-footer">
+          <Card.Footer className="auth-form-footer mt-8">
             <Button
               className="auth-submit"
               isDisabled={loading || !email.trim() || !password}

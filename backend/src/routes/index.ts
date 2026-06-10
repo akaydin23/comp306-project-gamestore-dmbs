@@ -4,6 +4,7 @@ import authRouter from './auth.js';
 import gamesRouter from './games.js';
 import genresRouter from './genres.js';
 import userRoutes from './user.js';
+import libraryRouter from './library.js';
 
 const router: Router = Router();
 
@@ -16,5 +17,6 @@ router.use('/auth', authRouter);
 router.use('/games', gamesRouter);
 router.use('/genres', genresRouter);
 router.use('/users', userRoutes);
+router.use('/library', libraryRouter);
 
 export default router;

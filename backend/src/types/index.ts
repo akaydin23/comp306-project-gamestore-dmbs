@@ -27,18 +27,24 @@ export interface GameSummary {
   game_id: number;
   name: string;
   description: string | null;
-  price: string;
+  price: number;
   developer_user_id: number | null;
   studio_name: string | null;
   release_date: string | null;
   cover_image_url: string | null;
   genres: string[] | null;
-  average_rating: string | null;
-  review_count: string;
-  wishlist_count: string;
+  average_rating: number | null;
+  review_count: number;
+  wishlist_count: number;
 }
 
 export interface Genre {
   genre_id: number;
   genre_name: string;
+}
+
+export interface LibraryEntry {
+  game: GameSummary;
+  purchase_date: string | null;
+  hours_played: number;
 }

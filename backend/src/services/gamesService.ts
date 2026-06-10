@@ -55,15 +55,15 @@ export async function getGames(filters: GameFilters): Promise<GameSummary[]> {
         g.game_id,
         g.name,
         g.description,
-        g.price,
+        g.price::FLOAT AS price,
         g.developer_user_id,
         dp.studio_name,
         g.release_date,
         g.cover_image_url,
         array_agg(DISTINCT ge.genre_name) FILTER (WHERE ge.genre_name IS NOT NULL) AS genres,
-        ROUND(AVG(r.rating)) AS average_rating,
-        COUNT(DISTINCT r.review_id) AS review_count,
-        COUNT(DISTINCT w.user_id) AS wishlist_count
+        ROUND(AVG(r.rating))::FLOAT AS average_rating,
+        COUNT(DISTINCT r.review_id)::INTEGER AS review_count,
+        COUNT(DISTINCT w.user_id)::INTEGER AS wishlist_count
       FROM Games g
       LEFT JOIN DeveloperProfiles dp ON dp.user_id = g.developer_user_id
       LEFT JOIN GameGenres gg ON gg.game_id = g.game_id
@@ -85,15 +85,15 @@ export async function getGameById(gameId: number): Promise<GameSummary> {
         g.game_id,
         g.name,
         g.description,
-        g.price,
+        g.price::FLOAT AS price,
         g.developer_user_id,
         dp.studio_name,
         g.release_date,
         g.cover_image_url,
         array_agg(DISTINCT ge.genre_name) FILTER (WHERE ge.genre_name IS NOT NULL) AS genres,
-        ROUND(AVG(r.rating)) AS average_rating,
-        COUNT(DISTINCT r.review_id) AS review_count,
-        COUNT(DISTINCT w.user_id) AS wishlist_count
+        ROUND(AVG(r.rating))::FLOAT AS average_rating,
+        COUNT(DISTINCT r.review_id)::INTEGER AS review_count,
+        COUNT(DISTINCT w.user_id)::INTEGER AS wishlist_count
       FROM Games g
       LEFT JOIN DeveloperProfiles dp ON dp.user_id = g.developer_user_id
       LEFT JOIN GameGenres gg ON gg.game_id = g.game_id
