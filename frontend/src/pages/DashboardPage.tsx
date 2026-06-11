@@ -34,7 +34,7 @@ export default function DashboardPage() {
       <div className="dashboard-card" style={{ flexShrink: 0 }}>
         <div className="text-center mb-8 relative z-10 animate-in">
           <h1 className="text-2xl font-bold tracking-tight m-0 text-foreground">
-            Game<span className="text-accent">Store</span>
+            Game<span className="text-accent">Hub</span>
           </h1>
           <p className="mt-1 text-sm text-muted">Welcome back</p>
         </div>
