@@ -192,3 +192,17 @@ CREATE TABLE Gifts (
     FOREIGN KEY (game_id) REFERENCES Games(game_id)
         ON DELETE RESTRICT
 );
+
+CREATE TABLE Friends (
+    user_id INT NOT NULL,
+    friend_id INT NOT NULL,
+    status VARCHAR(20) NOT NULL DEFAULT 'PENDING',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    PRIMARY KEY (user_id, friend_id),
+    CONSTRAINT no_self_friend CHECK (user_id <> friend_id),
+    CONSTRAINT valid_friend_status CHECK (status IN ('PENDING', 'ACCEPTED', 'BLOCKED')),
+
+    FOREIGN KEY (user_id) REFERENCES Users(user_id) ON DELETE CASCADE,
+    FOREIGN KEY (friend_id) REFERENCES Users(user_id) ON DELETE CASCADE
+);

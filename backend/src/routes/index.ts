@@ -6,6 +6,7 @@ import genresRouter from './genres.js';
 import userRoutes from './user.js';
 import libraryRouter from './library.js';
 import cartRouter from './cart.js';
+import friendsRouter from './friends.js';
 
 const router: Router = Router();
 
@@ -20,5 +21,6 @@ router.use('/genres', genresRouter);
 router.use('/users', userRoutes);
 router.use('/library', libraryRouter);
 router.use('/cart', cartRouter);
+router.use('/friends', friendsRouter);
 
 export default router;

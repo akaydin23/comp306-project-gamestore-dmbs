@@ -19,6 +19,7 @@ export default function Navbar() {
         <div className="navbar-links">
           <NavLink to="/" end>Store</NavLink>
           {isAuthenticated && <NavLink to="/library">Library</NavLink>}
+          {isAuthenticated && <NavLink to="/dashboard">Friends</NavLink>}
         </div>
 
         <div className="navbar-actions">

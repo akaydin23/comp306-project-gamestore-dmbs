@@ -1,5 +1,6 @@
 import { Button, Card } from '@heroui/react'
 import { useAuth } from '../context/useAuth'
+import FriendsPanel from '../components/FriendsPanel';
 
 export default function DashboardPage() {
   const { user, logout } = useAuth()
@@ -46,6 +47,10 @@ export default function DashboardPage() {
                 <p className="stat-label">User ID</p>
                 <p className="stat-value">#{user.user_id}</p>
               </div>
+            </div>
+
+            <div style={{ marginTop: '20px', borderTop: '1px solid #2a475e', paddingTop: '20px' }}>
+              <FriendsPanel />
             </div>
           </Card.Content>
 
