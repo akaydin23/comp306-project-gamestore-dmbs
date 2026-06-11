@@ -17,6 +17,8 @@ import WishlistPage from './pages/WishlistPage'
 import PlayPage from './pages/PlayPage'
 import AdminPage from './pages/AdminPage'
 
+import ExplorePage from './pages/ExplorePage'
+
 function PublicRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isLoading } = useAuth()
 
@@ -96,6 +98,7 @@ function AppRoutes() {
         }
       />
       <Route element={<AppLayout />}>
+        <Route path="/explore" element={<ExplorePage />} />
         <Route path="/store" element={<StorePage />} />
         <Route path="/store/:gameId" element={<GameDetailPage />} />
         <Route

@@ -20,6 +20,7 @@ export default function Navbar() {
 
         <div className="navbar-links">
           <NavLink to="/store">Store</NavLink>
+          <NavLink to="/explore">Explore Engine</NavLink> 
           {isAuthenticated && <NavLink to="/library">Library</NavLink>}
           {isAuthenticated && <NavLink to="/wishlist">Wishlist</NavLink>}
           {isAuthenticated && <NavLink to="/dashboard">Friends</NavLink>}

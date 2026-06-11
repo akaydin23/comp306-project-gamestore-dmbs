@@ -113,3 +113,117 @@ export async function getGameById(gameId: number): Promise<GameSummary> {
 
   return result.rows[0];
 }
+
+export const getAdvancedSearchGames = async (filters: {
+  q?: string;
+  studio?: string;        
+  minPrice?: number;
+  maxPrice?: number;
+  minRating?: number;
+  startDate?: string;     
+  endDate?: string;       
+  excludeOwned?: boolean;
+  wishlistOnly?: boolean;
+  sort?: string;
+  userId?: number;
+}): Promise<any[]> => {
+  const { q, studio, minPrice, maxPrice, minRating, startDate, endDate, excludeOwned, wishlistOnly, sort, userId } = filters;
+  
+  let queryValues: any[] = [];
+  let whereClauses: string[] = [];
+
+  
+  if (q && q.trim() !== '') {
+    queryValues.push(`%${q.trim()}%`);
+    whereClauses.push(`g.name ILIKE $${queryValues.length}`);
+  }
+
+  
+  if (studio && studio.trim() !== '') {
+    queryValues.push(`%${studio.trim()}%`);
+    whereClauses.push(`dp.studio_name ILIKE $${queryValues.length}`);
+  }
+
+  
+  if (minPrice !== undefined) {
+    queryValues.push(minPrice);
+    whereClauses.push(`g.price >= $${queryValues.length}`);
+  }
+  if (maxPrice !== undefined) {
+    queryValues.push(maxPrice);
+    whereClauses.push(`g.price <= $${queryValues.length}`);
+  }
+
+  
+  if (startDate) {
+    queryValues.push(startDate);
+    whereClauses.push(`g.release_date >= $${queryValues.length}::DATE`);
+  }
+  if (endDate) {
+    queryValues.push(endDate);
+    whereClauses.push(`g.release_date <= $${queryValues.length}::DATE`);
+  }
+
+  
+  if (excludeOwned && userId) {
+    queryValues.push(userId);
+    whereClauses.push(`NOT EXISTS (
+      SELECT 1 FROM Library l 
+      WHERE l.game_id = g.game_id AND l.user_id = $${queryValues.length}
+    )`);
+  }
+
+  if (wishlistOnly && userId) {
+    queryValues.push(userId);
+    whereClauses.push(`EXISTS (
+      SELECT 1 FROM Wishlists w 
+      WHERE w.game_id = g.game_id AND w.user_id = $${queryValues.length}
+    )`);
+  }
+
+  let whereSql = whereClauses.length > 0 ? `WHERE ${whereClauses.join(' AND ')}` : '';
+
+  
+  let havingClauses: string[] = [];
+  if (minRating && minRating > 0) {
+    queryValues.push(minRating);
+    havingClauses.push(`COALESCE(AVG(r.rating), 0) >= $${queryValues.length}`);
+  }
+  let havingSql = havingClauses.length > 0 ? `HAVING ${havingClauses.join(' AND ')}` : '';
+
+  
+  let orderBySql = 'ORDER BY g.name ASC'; // Standard alpha alphabetical default
+  if (sort === 'release_desc') orderBySql = 'ORDER BY g.release_date DESC NULLS LAST';
+  if (sort === 'release_asc') orderBySql = 'ORDER BY g.release_date ASC NULLS LAST';
+  if (sort === 'price_asc') orderBySql = 'ORDER BY g.price ASC';
+  if (sort === 'price_desc') orderBySql = 'ORDER BY g.price DESC';
+  if (sort === 'rating_desc') orderBySql = 'ORDER BY average_rating DESC';
+
+  
+  const finalSqlQuery = `
+    SELECT 
+      g.game_id, 
+      g.name, 
+      g.description,
+      g.price::FLOAT AS price, 
+      g.release_date,
+      g.cover_image_url,
+      dp.studio_name,
+      ROUND(COALESCE(AVG(r.rating), 0))::FLOAT as average_rating,
+      COUNT(DISTINCT r.review_id)::INTEGER as review_count,
+      ARRAY_AGG(DISTINCT gen.genre_name) FILTER (WHERE gen.genre_name IS NOT NULL) as genres
+    FROM Games g
+    LEFT JOIN DeveloperProfiles dp ON dp.user_id = g.developer_user_id
+    LEFT JOIN Reviews r ON g.game_id = r.game_id
+    LEFT JOIN GameGenres gg ON g.game_id = gg.game_id
+    LEFT JOIN Genres gen ON gg.genre_id = gen.genre_id
+    ${whereSql}
+    GROUP BY g.game_id, dp.studio_name
+    ${havingSql}
+    ${orderBySql};
+  `;
+
+  const result = await pool.query(finalSqlQuery, queryValues);
+  return result.rows;
+};
+
