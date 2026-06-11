@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { Label, ListBox, SearchField, Select, Spinner } from '@heroui/react'
 import GameCard from '../components/GameCard'
-import { getGames, getGenres } from '../api/games'
+import { getGames, getGenres, getLibrary } from '../api/games'
+import { useAuth } from '../context/useAuth'
 import type { Game, Genre } from '../types'
 
 const SORT_OPTIONS = [
@@ -13,10 +14,12 @@ const SORT_OPTIONS = [
 ]
 
 export default function StorePage() {
+  const { isAuthenticated } = useAuth()
   const [games, setGames] = useState<Game[]>([])
   const [genres, setGenres] = useState<Genre[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [ownedGameIds, setOwnedGameIds] = useState<Set<number>>(new Set())
 
   const [search, setSearch] = useState('')
   const [genre, setGenre] = useState<string | null>(null)
@@ -44,6 +47,14 @@ export default function StorePage() {
   useEffect(() => {
     getGenres().then((res) => setGenres(res.genres)).catch(() => {})
   }, [])
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      getLibrary()
+        .then((res) => setOwnedGameIds(new Set(res.library.map((e) => e.game.game_id))))
+        .catch(() => {})
+    }
+  }, [isAuthenticated])
 
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current)
@@ -144,7 +155,7 @@ export default function StorePage() {
       {!loading && !error && games.length > 0 && (
         <div className="game-grid">
           {games.map((game) => (
-            <GameCard key={game.game_id} variant="store" game={game} />
+            <GameCard key={game.game_id} variant="store" game={game} isOwned={ownedGameIds.has(game.game_id)} />
           ))}
         </div>
       )}

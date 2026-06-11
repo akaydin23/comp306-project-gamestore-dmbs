@@ -10,6 +10,7 @@ type GameCardProps =
   | {
       variant: 'store'
       game: Game
+      isOwned?: boolean
       initialWishlisted?: boolean
       onWishlistChange?: (gameId: number, wishlisted: boolean) => void
     }
@@ -132,37 +133,41 @@ export default function GameCard(props: GameCardProps) {
             <span className="game-card-price">
               {formatPrice(game.price)}
             </span>
-            <div className="game-card-action-buttons">
-              <Button
-                className="game-card-wishlist-btn"
-                isDisabled={wishlistBusy}
-                size="sm"
-                variant={wishlisted ? 'secondary' : 'ghost'}
-                onPress={toggleWishlist}
-              >
-                {wishlisted ? 'Saved' : 'Wishlist'}
-              </Button>
-              {inCart ? (
-                <Button className="game-card-cart-btn" size="sm" variant="ghost" isDisabled>
-                  In Cart
-                </Button>
-              ) : (
+              <div className="game-card-action-buttons">
                 <Button
-                  className="game-card-cart-btn"
+                  className="game-card-wishlist-btn"
+                  isDisabled={wishlistBusy}
                   size="sm"
-                  variant="secondary"
-                  onPress={() => {
-                    if (isAuthenticated) {
-                      addToCart(game.game_id)
-                    } else {
-                      navigate('/login')
-                    }
-                  }}
+                  variant={wishlisted ? 'secondary' : 'ghost'}
+                  onPress={toggleWishlist}
                 >
-                  Add to Cart
+                  {wishlisted ? 'Saved' : 'Wishlist'}
                 </Button>
-              )}
-            </div>
+                {props.isOwned ? (
+                  <Button className="game-card-cart-btn" size="sm" variant="ghost" isDisabled>
+                    In Library
+                  </Button>
+                ) : inCart ? (
+                  <Button className="game-card-cart-btn" size="sm" variant="ghost" isDisabled>
+                    In Cart
+                  </Button>
+                ) : (
+                  <Button
+                    className="game-card-cart-btn"
+                    size="sm"
+                    variant="secondary"
+                    onPress={() => {
+                      if (isAuthenticated) {
+                        addToCart(game.game_id)
+                      } else {
+                        navigate('/login')
+                      }
+                    }}
+                  >
+                    Add to Cart
+                  </Button>
+                )}
+              </div>
           </div>
         ) : (
           <div className="game-card-actions">
