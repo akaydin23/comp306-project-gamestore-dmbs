@@ -14,10 +14,10 @@ export function getPendingRequests(): Promise<{ requests: Friend[] }> {
   return apiFetch('/friends/pending');
 }
 
-export function sendFriendRequest(receiver_id: number): Promise<{ message: string }> {
+export function sendFriendRequest(receiverId: number): Promise<{ message: string }> {
   return apiFetch('/friends/requests', {
     method: 'POST',
-    body: JSON.stringify({ receiver_id }),
+    body: JSON.stringify({ receiver_id: receiverId }),
   });
 }
 

@@ -24,8 +24,14 @@ export default function DashboardPage() {
         : 'role-badge--user'
 
   return (
-    <div className="dashboard-page">
-      <div className="dashboard-card">
+    <div className="dashboard-page" style={{ 
+      display: 'flex', 
+      gap: '30px', 
+      justifyContent: 'center', 
+      alignItems: 'flex-start',
+      padding: '40px max(20px, 4%)'
+    }}>
+      <div className="dashboard-card" style={{ flexShrink: 0 }}>
         <div className="text-center mb-8 relative z-10 animate-in">
           <h1 className="text-2xl font-bold tracking-tight m-0 text-foreground">
             Game<span className="text-accent">Store</span>
@@ -61,7 +67,6 @@ export default function DashboardPage() {
                 <p className="stat-value">#{user.user_id}</p>
               </div>
             </div>
-
             <form
               className="profile-form"
               onSubmit={async (e: SyntheticEvent<HTMLFormElement>) => {
@@ -79,50 +84,59 @@ export default function DashboardPage() {
                   setSavingProfile(false)
                 }
               }}
+              style={{ marginTop: '20px', display: 'flex', flexDirection: 'column', gap: '12px' }}
             >
-              <div className="profile-form-header">
-                <h3>Edit Profile</h3>
+              <div className="profile-form-header" style={{ borderTop: '1px solid #2a475e', paddingTop: '15px' }}>
+                <h3 style={{ margin: '0 0 10px 0', fontSize: '16px', color: '#66c0f4' }}>Edit Profile</h3>
               </div>
-              <label>
+              <label style={{ display: 'flex', flexDirection: 'column', gap: '4px', fontSize: '13px' }}>
                 Username
-                <input value={username} onChange={(e) => setUsername(e.target.value)} />
+                <input 
+                  value={username} 
+                  onChange={(e) => setUsername(e.target.value)} 
+                  style={{ padding: '6px', borderRadius: '4px', border: '1px solid #2a475e', backgroundColor: '#101822', color: '#fff' }}
+                />
               </label>
-              <label>
+              <label style={{ display: 'flex', flexDirection: 'column', gap: '4px', fontSize: '13px' }}>
                 Bio
-                <textarea value={bio} onChange={(e) => setBio(e.target.value)} />
+                <textarea 
+                  value={bio} 
+                  onChange={(e) => setBio(e.target.value)} 
+                  style={{ padding: '6px', borderRadius: '4px', border: '1px solid #2a475e', backgroundColor: '#101822', color: '#fff', resize: 'vertical', minHeight: '60px' }}
+                />
               </label>
-              <label>
+              <label style={{ display: 'flex', flexDirection: 'column', gap: '4px', fontSize: '13px' }}>
                 Profile image URL
                 <input
                   value={profileImageUrl}
                   placeholder="https://..."
                   onChange={(e) => setProfileImageUrl(e.target.value)}
+                  style={{ padding: '6px', borderRadius: '4px', border: '1px solid #2a475e', backgroundColor: '#101822', color: '#fff' }}
                 />
               </label>
-              {profileError && <div className="checkout-alert checkout-alert--error">{profileError}</div>}
-              {profileMessage && <div className="checkout-alert checkout-alert--success">{profileMessage}</div>}
+              {profileError && <div style={{ color: '#ff4d4d', fontSize: '12px' }}>⚠️ {profileError}</div>}
+              {profileMessage && <div style={{ color: '#4caf50', fontSize: '12px' }}>✅ {profileMessage}</div>}
               <Button
                 className="profile-save"
                 isDisabled={!username.trim()}
                 isPending={savingProfile}
                 type="submit"
                 variant="secondary"
+                style={{ alignSelf: 'flex-start', marginTop: '5px' }}
               >
                 Save Profile
               </Button>
             </form>
-
-            <div className="dashboard-friends">
-              <FriendsPanel />
-            </div>
           </Card.Content>
-
           <Card.Footer>
             <Button className="w-full" onPress={logout} variant="danger">
               Sign Out
             </Button>
           </Card.Footer>
         </Card>
+      </div>
+      <div style={{ marginTop: '76px' }}>
+        <FriendsPanel />
       </div>
     </div>
   )

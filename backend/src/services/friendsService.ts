@@ -8,7 +8,7 @@ export interface FriendRelation {
 
 export async function sendFriendRequest(senderId: number, receiverId: number): Promise<void> {
   const existing = await pool.query(
-    `SELECT 1 FROM Friends 
+    `SELECT 1 FROM friends 
      WHERE (user_id = $1 AND friend_id = $2) 
         OR (user_id = $2 AND friend_id = $1)`,
     [senderId, receiverId],
@@ -21,14 +21,14 @@ export async function sendFriendRequest(senderId: number, receiverId: number): P
   }
 
   await pool.query(
-    'INSERT INTO Friends (user_id, friend_id, status) VALUES ($1, $2, \'PENDING\')',
+    'INSERT INTO friends (user_id, friend_id, status) VALUES ($1, $2, \'PENDING\')',
     [senderId, receiverId],
   );
 }
 
 export async function acceptFriendRequest(receiverId: number, senderId: number): Promise<void> {
   const result = await pool.query(
-    `UPDATE Friends 
+    `UPDATE friends 
      SET status = 'ACCEPTED' 
      WHERE user_id = $1 AND friend_id = $2 AND status = 'PENDING'`,
     [senderId, receiverId],
@@ -44,12 +44,12 @@ export async function acceptFriendRequest(receiverId: number, senderId: number):
 export async function getFriends(userId: number): Promise<FriendRelation[]> {
   const result = await pool.query<FriendRelation>(
     `SELECT u.user_id, u.username, u.profile_image_url
-     FROM Friends f
+     FROM friends f
      JOIN Users u ON (f.user_id = u.user_id OR f.friend_id = u.user_id)
      WHERE (f.user_id = $1 OR f.friend_id = $1)
        AND f.status = 'ACCEPTED'
        AND u.user_id <> $1
-     ORDER BY u.username ASC`,
+       ORDER BY u.username ASC`,
     [userId],
   );
   return result.rows;
@@ -58,7 +58,7 @@ export async function getFriends(userId: number): Promise<FriendRelation[]> {
 export async function getPendingRequests(userId: number): Promise<FriendRelation[]> {
   const result = await pool.query<FriendRelation>(
     `SELECT u.user_id, u.username, u.profile_image_url
-     FROM Friends f
+     FROM friends f
      JOIN Users u ON f.user_id = u.user_id
      WHERE f.friend_id = $1 AND f.status = 'PENDING'
      ORDER BY f.created_at DESC`,

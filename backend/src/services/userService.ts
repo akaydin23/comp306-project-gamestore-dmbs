@@ -1,16 +1,12 @@
 import pool from '../db/pool.js';
 import { User } from '../types/index.js';
 
-//Basically updates the profile of the user
-//Only username, bio and profile image cause id is key att
 export async function updateProfile(
   userId: number,
   username: string, 
   bio: string,
   profileImageUrl: string
 ) {
-  //Here dollar signs are placeholders. $1 is username for example
-  //A small query to update, user_id = $4 is for join condition
   const result = await pool.query<User>(
     `UPDATE Users
      SET username = $1,
@@ -21,7 +17,22 @@ export async function updateProfile(
     [username, bio, profileImageUrl, userId]
   );
 
-  //Returns array or rows since user_id is unique,
-  //only one row is updated
   return result.rows[0];
+}
+
+export interface UserSearchMatch {
+  user_id: number;
+  username: string;
+  profile_image_url: string;
+}
+
+export async function searchUsersByUsername(currentUserId: number, query: string): Promise<UserSearchMatch[]> {
+  const result = await pool.query<UserSearchMatch>(
+    `SELECT user_id, username, profile_image_url 
+     FROM users 
+     WHERE username ILIKE $1 AND user_id <> $2
+     LIMIT 10`,
+    [`%${query}%`, currentUserId]
+  );
+  return result.rows;
 }
