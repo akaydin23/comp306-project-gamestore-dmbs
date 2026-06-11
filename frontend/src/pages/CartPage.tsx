@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { Button, Card, Chip, CloseButton, Spinner } from '@heroui/react'
+import { Button, Card, Chip, CloseButton, Spinner, toast } from '@heroui/react'
 import { useCart } from '../context/useCart'
 import { checkoutCart } from '../api/checkout'
 
@@ -59,7 +59,9 @@ export default function CartPage() {
     try {
       const res = await checkoutCart()
       await clearCart()
-      setCheckoutMessage(`Purchase #${res.purchase.purchase_id} completed.`)
+      toast.success('Purchase completed!', {
+        description: `Order #${res.purchase.purchase_id} — ${formatPrice(res.purchase.total_price)}`,
+      })
       navigate('/library')
     } catch (err) {
       setCheckoutError(err instanceof Error ? err.message : 'Checkout failed')

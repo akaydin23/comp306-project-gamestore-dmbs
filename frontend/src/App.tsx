@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { Toast } from '@heroui/react'
 import { AuthProvider } from './context/AuthContext'
 import { CartProvider } from './context/CartContext'
 import { useAuth } from './context/useAuth'
@@ -125,6 +126,7 @@ function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
+        <Toast.Provider />
         <AppInner />
       </AuthProvider>
     </BrowserRouter>
