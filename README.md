@@ -1,10 +1,10 @@
-# GameStore
+# GameHub
 
 A video game store web application built for **COMP 306: Database Management Systems**. The project demonstrates a full-stack application backed by a relational PostgreSQL database, with a React frontend, an Express API, and SQL-driven business logic.
 
 ## Overview
 
-GameStore lets users browse a digital game catalog, create accounts, manage a shopping cart, view an owned-game library, and interact with a friends system. The database schema models users, developers, games, genres, purchases, carts, libraries, reviews, wishlists, favorites, gifts, and social relationships.
+GameHub lets users browse a digital game catalog, create accounts, manage a shopping cart, view an owned-game library, and interact with a friends system. The database schema models users, developers, games, genres, purchases, carts, libraries, reviews, wishlists, favorites, gifts, and social relationships.
 
 The application is designed to showcase core DBMS concepts: primary and foreign keys, many-to-many relationships, check and unique constraints, joins, aggregates, parameterized queries, and referential integrity.
 

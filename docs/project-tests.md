@@ -1,4 +1,4 @@
-# GameStore Manual Testing Guide
+# GameHub Manual Testing Guide
 
 ## 1. Purpose
 

@@ -13,9 +13,9 @@ export default function Navbar() {
   return (
     <nav className="navbar">
       <div className="navbar-content">
-        <NavLink to="/store" className="navbar-brand" aria-label="GameStore store">
+        <NavLink to="/store" className="navbar-brand" aria-label="GameHub store">
           <BrandLogo className="navbar-brand-mark" />
-          <span className="navbar-brand-text">Game<span>Store</span></span>
+          <span className="navbar-brand-text">Game<span>Hub</span></span>
         </NavLink>
 
         <div className="navbar-links">

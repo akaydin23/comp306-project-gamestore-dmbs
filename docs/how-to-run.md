@@ -1,8 +1,8 @@
-# How to Run GameStore
+# How to Run GameHub
 
 ## 1. What You Are Running
 
-GameStore has three parts:
+GameHub has three parts:
 
 - PostgreSQL database on port `5432`.
 - Express backend API on port `3000`.

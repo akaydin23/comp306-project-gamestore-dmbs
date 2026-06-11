@@ -1,4 +1,4 @@
-# GameStore Project Explanation
+# GameHub Project Explanation
 
 ## 1. Project Overview
 

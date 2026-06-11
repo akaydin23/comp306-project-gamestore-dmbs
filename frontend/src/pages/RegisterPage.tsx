@@ -45,7 +45,7 @@ export default function RegisterPage() {
 
   return (
     <AuthLayout
-      eyebrow="Join GameStore"
+      eyebrow="Join GameHub"
       title="Create your account"
       subtitle="Choose your username and login details."
     >

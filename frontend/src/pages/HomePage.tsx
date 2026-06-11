@@ -13,7 +13,7 @@ export default function HomePage() {
     <main className="home-page">
       <div className="home-shell">
         <nav className="home-nav animate-in" aria-label="Main navigation">
-          <Link to="/" className="home-logo" aria-label="GameStore home">
+          <Link to="/" className="home-logo" aria-label="GameHub home">
             <BrandLogo />
           </Link>
           <div className="home-nav-actions">
@@ -26,7 +26,7 @@ export default function HomePage() {
 
         <section className="home-hero">
           <div className="home-copy animate-in-delay-1">
-            <p className="home-eyebrow">GameStore</p>
+            <p className="home-eyebrow">GameHub</p>
             <h1>Your game library starts here.</h1>
             <p className="home-subtitle">
               Browse games, manage your cart and library, and connect with friends

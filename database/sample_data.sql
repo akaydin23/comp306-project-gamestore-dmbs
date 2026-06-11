@@ -1,4 +1,4 @@
--- Repeatable demo seed data for GameStore.
+-- Repeatable demo seed data for GameHub.
 -- Load after schema.sql. This reset keeps IDs stable for demos and test queries.
 TRUNCATE TABLE
     Friends,
