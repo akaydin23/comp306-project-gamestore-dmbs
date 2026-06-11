@@ -6,7 +6,7 @@ CREATE TABLE Users (
     bio TEXT,
     profile_image_url VARCHAR(255) NOT NULL DEFAULT 'default.jpg',
     role VARCHAR(20) NOT NULL DEFAULT 'USER',
-
+    
     CHECK (role IN ('USER', 'ADMIN', 'DEVELOPER'))
 );
 
