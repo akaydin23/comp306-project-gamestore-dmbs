@@ -34,13 +34,7 @@ The application is designed to showcase core DBMS concepts: primary and foreign 
 - Realistic demo seed data for meaningful SQL query outputs
 - REST API with layered backend architecture
 
-### In Progress / Database Only
 
-These are modeled in the schema and have partial or basic behavior, but could be expanded further:
-
-- Advanced gift purchase/payment handling
-- Friend removal, request rejection, and block/unblock controls
-- More detailed developer analytics
 
 See [docs/project-explanation.md](./docs/project-explanation.md) for the full architecture breakdown and current limitations.
 
