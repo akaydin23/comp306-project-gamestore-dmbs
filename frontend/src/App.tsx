@@ -15,6 +15,7 @@ import CartPage from './pages/CartPage'
 import DashboardPage from './pages/DashboardPage'
 import WishlistPage from './pages/WishlistPage'
 import PlayPage from './pages/PlayPage'
+import AdminPage from './pages/AdminPage'
 
 function PublicRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isLoading } = useAuth()
@@ -50,6 +51,28 @@ function HomeRoute() {
   }
 
   return <HomePage />
+}
+
+function AdminRoute({ children }: { children: React.ReactNode }) {
+  const { user, isAuthenticated, isLoading } = useAuth()
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-1 items-center justify-center">
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-accent border-t-transparent" />
+      </div>
+    )
+  }
+
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />
+  }
+
+  if (user?.role !== 'ADMIN') {
+    return <Navigate to="/store" replace />
+  }
+
+  return <>{children}</>
 }
 
 function AppRoutes() {
@@ -113,6 +136,14 @@ function AppRoutes() {
             <ProtectedRoute>
               <PlayPage />
             </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin"
+          element={
+            <AdminRoute>
+              <AdminPage />
+            </AdminRoute>
           }
         />
       </Route>

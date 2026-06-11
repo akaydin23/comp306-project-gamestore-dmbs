@@ -10,6 +10,7 @@ import friendsRouter from './friends.js';
 import checkoutRouter from './checkout.js';
 import wishlistRouter from './wishlist.js';
 import reviewsRouter from './reviews.js';
+import adminRouter from './admin.js';
 
 const router: Router = Router();
 
@@ -28,5 +29,6 @@ router.use('/friends', friendsRouter);
 router.use('/checkout', checkoutRouter);
 router.use('/wishlist', wishlistRouter);
 router.use('/reviews', reviewsRouter);
+router.use('/admin', adminRouter);
 
 export default router;

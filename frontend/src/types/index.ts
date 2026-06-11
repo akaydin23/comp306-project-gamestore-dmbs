@@ -63,3 +63,59 @@ export interface CheckoutResult {
   total_price: number
   item_count: number
 }
+
+export interface AdminTopGame {
+  game_id: number
+  name: string
+  purchase_count: number
+  revenue: number
+}
+
+export interface AdminStats {
+  user_count: number
+  game_count: number
+  purchase_count: number
+  review_count: number
+  library_count: number
+  wishlist_count: number
+  total_revenue: number
+  top_games: AdminTopGame[]
+}
+
+export interface AdminUser {
+  user_id: number
+  username: string
+  email: string
+  role: User['role']
+  library_count: number
+  review_count: number
+  wishlist_count: number
+  total_spent: number
+}
+
+export interface AdminPurchaseItem {
+  game_id: number
+  name: string
+  price_at_purchase: number
+}
+
+export interface AdminPurchase {
+  purchase_id: number
+  user_id: number
+  username: string
+  total_price: number
+  purchase_date: string
+  payment_method: string
+  item_count: number
+  items: AdminPurchaseItem[]
+}
+
+export interface AdminGameInput {
+  name: string
+  description: string | null
+  price: number
+  developer_user_id: number | null
+  release_date: string | null
+  cover_image_url: string | null
+  genre_ids: number[]
+}

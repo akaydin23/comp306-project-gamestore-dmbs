@@ -23,6 +23,7 @@ export default function Navbar() {
           {isAuthenticated && <NavLink to="/library">Library</NavLink>}
           {isAuthenticated && <NavLink to="/wishlist">Wishlist</NavLink>}
           {isAuthenticated && <NavLink to="/dashboard">Friends</NavLink>}
+          {user?.role === 'ADMIN' && <NavLink to="/admin">Admin</NavLink>}
         </div>
 
         <div className="navbar-actions">
