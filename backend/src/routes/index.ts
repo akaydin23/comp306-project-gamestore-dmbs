@@ -11,6 +11,9 @@ import checkoutRouter from './checkout.js';
 import wishlistRouter from './wishlist.js';
 import reviewsRouter from './reviews.js';
 import adminRouter from './admin.js';
+import favoritesRouter from './favorites.js';
+import giftsRouter from './gifts.js';
+import developerRouter from './developer.js';
 
 const router: Router = Router();
 
@@ -30,5 +33,8 @@ router.use('/checkout', checkoutRouter);
 router.use('/wishlist', wishlistRouter);
 router.use('/reviews', reviewsRouter);
 router.use('/admin', adminRouter);
+router.use('/favorites', favoritesRouter);
+router.use('/gifts', giftsRouter);
+router.use('/developer', developerRouter);
 
 export default router;

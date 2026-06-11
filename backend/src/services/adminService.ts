@@ -10,8 +10,10 @@ export interface AdminGameInput {
   genre_ids: number[];
 }
 
+export type AdminUserRole = 'USER' | 'ADMIN' | 'DEVELOPER';
+
 export async function getStats() {
-  const [users, games, purchases, reviews, revenue, library, wishlist] = await Promise.all([
+  const [users, games, purchases, reviews, revenue, library, wishlist, favorites, gifts] = await Promise.all([
     pool.query<{ count: string }>('SELECT COUNT(*) AS count FROM Users'),
     pool.query<{ count: string }>('SELECT COUNT(*) AS count FROM Games'),
     pool.query<{ count: string }>('SELECT COUNT(*) AS count FROM Purchases'),
@@ -19,6 +21,8 @@ export async function getStats() {
     pool.query<{ total: string | null }>('SELECT COALESCE(SUM(total_price), 0) AS total FROM Purchases'),
     pool.query<{ count: string }>('SELECT COUNT(*) AS count FROM Library'),
     pool.query<{ count: string }>('SELECT COUNT(*) AS count FROM Wishlists'),
+    pool.query<{ count: string }>('SELECT COUNT(*) AS count FROM Favorites'),
+    pool.query<{ count: string }>('SELECT COUNT(*) AS count FROM Gifts'),
   ]);
 
   const topGames = await pool.query<{
@@ -46,6 +50,8 @@ export async function getStats() {
     review_count: Number(reviews.rows[0].count),
     library_count: Number(library.rows[0].count),
     wishlist_count: Number(wishlist.rows[0].count),
+    favorite_count: Number(favorites.rows[0].count),
+    gift_count: Number(gifts.rows[0].count),
     total_revenue: Number(revenue.rows[0].total),
     top_games: topGames.rows,
   };
@@ -60,15 +66,88 @@ export async function getUsers() {
         u.bio,
         u.profile_image_url,
         u.role,
+        dp.studio_name,
         (SELECT COUNT(*)::INTEGER FROM Library l WHERE l.user_id = u.user_id) AS library_count,
         (SELECT COUNT(*)::INTEGER FROM Reviews r WHERE r.user_id = u.user_id) AS review_count,
         (SELECT COUNT(*)::INTEGER FROM Wishlists w WHERE w.user_id = u.user_id) AS wishlist_count,
+        (SELECT COUNT(*)::INTEGER FROM Favorites f WHERE f.user_id = u.user_id) AS favorite_count,
+        (SELECT COUNT(*)::INTEGER FROM Gifts gf WHERE gf.sender_user_id = u.user_id OR gf.recipient_user_id = u.user_id) AS gift_count,
         (SELECT COALESCE(SUM(p.total_price), 0)::FLOAT FROM Purchases p WHERE p.user_id = u.user_id) AS total_spent
       FROM Users u
+      LEFT JOIN DeveloperProfiles dp ON dp.user_id = u.user_id
       ORDER BY u.user_id ASC`,
   );
 
   return result.rows;
+}
+
+export async function updateUserRole(
+  userId: number,
+  role: AdminUserRole,
+  studioName: string | null,
+) {
+  const client = await pool.connect();
+
+  try {
+    await client.query('BEGIN');
+
+    const user = await client.query<{ user_id: number; username: string }>(
+      `UPDATE Users
+       SET role = $1
+       WHERE user_id = $2
+       RETURNING user_id, username`,
+      [role, userId],
+    );
+
+    if (user.rows.length === 0) {
+      const err = new Error('User not found') as Error & { status: number };
+      err.status = 404;
+      throw err;
+    }
+
+    if (role === 'DEVELOPER') {
+      const fallbackStudioName = `${user.rows[0].username} Studio`;
+
+      await client.query(
+        `INSERT INTO DeveloperProfiles (user_id, studio_name)
+         VALUES ($1, $2)
+         ON CONFLICT (user_id) DO UPDATE SET studio_name = EXCLUDED.studio_name`,
+        [userId, studioName || fallbackStudioName],
+      );
+    } else {
+      await client.query('DELETE FROM DeveloperProfiles WHERE user_id = $1', [userId]);
+    }
+
+    await client.query('COMMIT');
+
+    const updated = await pool.query(
+      `SELECT
+          u.user_id,
+          u.username,
+          u.email,
+          u.bio,
+          u.profile_image_url,
+          u.role,
+          dp.studio_name,
+          (SELECT COUNT(*)::INTEGER FROM Library l WHERE l.user_id = u.user_id) AS library_count,
+          (SELECT COUNT(*)::INTEGER FROM Reviews r WHERE r.user_id = u.user_id) AS review_count,
+          (SELECT COUNT(*)::INTEGER FROM Wishlists w WHERE w.user_id = u.user_id) AS wishlist_count,
+          (SELECT COUNT(*)::INTEGER FROM Favorites f WHERE f.user_id = u.user_id) AS favorite_count,
+          (SELECT COUNT(*)::INTEGER FROM Gifts gf WHERE gf.sender_user_id = u.user_id OR gf.recipient_user_id = u.user_id) AS gift_count,
+          (SELECT COALESCE(SUM(p.total_price), 0)::FLOAT FROM Purchases p WHERE p.user_id = u.user_id) AS total_spent
+        FROM Users u
+        LEFT JOIN DeveloperProfiles dp ON dp.user_id = u.user_id
+        WHERE u.user_id = $1`,
+      [userId],
+    );
+
+    return updated.rows[0];
+  } catch (err) {
+    await client.query('ROLLBACK');
+    throw err;
+  } finally {
+    client.release();
+  }
 }
 
 export async function getPurchases() {

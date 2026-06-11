@@ -593,17 +593,16 @@ Expected result:
 - Ideally all commands pass.
 - If build fails because of an unused or missing file, treat it as a project issue to fix before submission.
 
-## 12. What Is Not Fully Testable Yet
+## 12. Remaining Manual Test Gaps
 
-These database concepts exist but do not have complete frontend flows:
+These flows are implemented, but should be manually tested before submission with the seeded dataset:
 
 - Checkout and purchase creation.
-- Wishlist management.
-- Review creation/editing.
-- Favorites management.
-- Gift sending/accepting/rejecting.
+- Wishlist, favorites, and review management.
+- Gift sending, accepting, rejecting, and cancelling.
 - Profile editing through the UI.
-- Sending friend requests through the UI.
-- Admin-only or developer-only screens.
+- Friend request sending and accepting.
+- Admin-only user role/game/genre/report screens.
+- Developer-only game management screens.
 
-You can still test some of them directly with SQL because the tables and sample rows exist.
+You can also test the underlying data directly with SQL because the seed includes meaningful rows for all major tables.

@@ -10,6 +10,7 @@ import {
   getAdminUsers,
   updateAdminGame,
   updateAdminGenre,
+  updateAdminUserRole,
 } from '../api/admin'
 import { getGames, getGenres } from '../api/games'
 import type { AdminGameInput, AdminPurchase, AdminStats, AdminUser, Game, Genre } from '../types'
@@ -22,6 +23,11 @@ type GameFormState = {
   releaseDate: string
   coverImageUrl: string
   genreIds: string[]
+}
+
+type RoleFormState = {
+  role: AdminUser['role']
+  studioName: string
 }
 
 const emptyGameForm: GameFormState = {
@@ -76,6 +82,7 @@ export default function AdminPage() {
   const [gameForm, setGameForm] = useState<GameFormState>(emptyGameForm)
   const [genreName, setGenreName] = useState('')
   const [editingGenreId, setEditingGenreId] = useState<number | null>(null)
+  const [roleForms, setRoleForms] = useState<Record<number, RoleFormState>>({})
 
   const developerOptions = useMemo(
     () => users.filter((user) => user.role === 'DEVELOPER' || user.role === 'ADMIN'),
@@ -96,6 +103,14 @@ export default function AdminPage() {
 
       setStats(statsRes.stats)
       setUsers(usersRes.users)
+      setRoleForms(
+        Object.fromEntries(
+          usersRes.users.map((user) => [
+            user.user_id,
+            { role: user.role, studioName: user.studio_name ?? '' },
+          ]),
+        ),
+      )
       setPurchases(purchasesRes.purchases)
       setGames(gamesRes.games)
       setGenres(genresRes.genres)
@@ -232,6 +247,33 @@ export default function AdminPage() {
     }
   }
 
+  function updateRoleForm(userId: number, patch: Partial<RoleFormState>) {
+    setRoleForms((current) => ({
+      ...current,
+      [userId]: {
+        role: current[userId]?.role ?? 'USER',
+        studioName: current[userId]?.studioName ?? '',
+        ...patch,
+      },
+    }))
+  }
+
+  async function handleSaveUserRole(user: AdminUser) {
+    const draft = roleForms[user.user_id]
+    if (!draft) return
+
+    setError('')
+    setMessage('')
+
+    try {
+      await updateAdminUserRole(user.user_id, draft.role, draft.studioName)
+      setMessage('User role updated')
+      await loadAdminData()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Could not update user role')
+    }
+  }
+
   if (loading) {
     return (
       <div className="page-content flex items-center justify-center py-24">
@@ -280,6 +322,14 @@ export default function AdminPage() {
           <div className="stat-item">
             <p className="stat-label">Wishlist Saves</p>
             <p className="stat-value">{stats.wishlist_count}</p>
+          </div>
+          <div className="stat-item">
+            <p className="stat-label">Favorites</p>
+            <p className="stat-value">{stats.favorite_count}</p>
+          </div>
+          <div className="stat-item">
+            <p className="stat-label">Gifts</p>
+            <p className="stat-value">{stats.gift_count}</p>
           </div>
         </section>
       )}
@@ -478,8 +528,10 @@ export default function AdminPage() {
                 <tr>
                   <th>User</th>
                   <th>Role</th>
+                  <th>Studio</th>
                   <th>Library</th>
                   <th>Spent</th>
+                  <th>Update</th>
                 </tr>
               </thead>
               <tbody>
@@ -490,10 +542,36 @@ export default function AdminPage() {
                       <span>{user.email}</span>
                     </td>
                     <td>
-                      <span className={`role-badge role-badge--${user.role.toLowerCase()}`}>{user.role}</span>
+                      <select
+                        className="admin-inline-select"
+                        value={roleForms[user.user_id]?.role ?? user.role}
+                        onChange={(event) => updateRoleForm(user.user_id, {
+                          role: event.target.value as AdminUser['role'],
+                        })}
+                      >
+                        <option value="USER">USER</option>
+                        <option value="ADMIN">ADMIN</option>
+                        <option value="DEVELOPER">DEVELOPER</option>
+                      </select>
+                    </td>
+                    <td>
+                      <input
+                        className="admin-inline-input"
+                        placeholder="Studio name"
+                        value={roleForms[user.user_id]?.studioName ?? ''}
+                        onChange={(event) => updateRoleForm(user.user_id, {
+                          studioName: event.target.value,
+                        })}
+                      />
+                      {user.studio_name && <span>Current: {user.studio_name}</span>}
                     </td>
                     <td>{user.library_count}</td>
                     <td>{formatMoney(user.total_spent)}</td>
+                    <td>
+                      <Button size="sm" variant="secondary" onPress={() => void handleSaveUserRole(user)}>
+                        Save
+                      </Button>
+                    </td>
                   </tr>
                 ))}
               </tbody>

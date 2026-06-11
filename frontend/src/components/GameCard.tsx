@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom'
 import { useAuth } from '../context/useAuth'
 import { useCart } from '../context/useCart'
 import { addToWishlist, removeFromWishlist } from '../api/wishlist'
+import { addToFavorites, removeFromFavorites } from '../api/favorites'
 import type { Game } from '../types'
 import { useState } from 'react'
 
@@ -12,7 +13,9 @@ type GameCardProps =
       game: Game
       isOwned?: boolean
       initialWishlisted?: boolean
+      initialFavorited?: boolean
       onWishlistChange?: (gameId: number, wishlisted: boolean) => void
+      onFavoriteChange?: (gameId: number, favorited: boolean) => void
     }
   | { variant: 'library'; game: Game; hoursPlayed: number; purchaseDate: string | null }
 
@@ -58,10 +61,12 @@ export default function GameCard(props: GameCardProps) {
   const { isAuthenticated } = useAuth()
   const { isInCart, addToCart } = useCart()
   const navigate = useNavigate()
-  const [wishlisted, setWishlisted] = useState(
-    variant === 'store' ? Boolean(props.initialWishlisted) : false,
-  )
+  const initialWishlisted = variant === 'store' ? Boolean(props.initialWishlisted) : false
+  const initialFavorited = variant === 'store' ? Boolean(props.initialFavorited) : false
+  const [wishlisted, setWishlisted] = useState(initialWishlisted)
+  const [favorited, setFavorited] = useState(initialFavorited)
   const [wishlistBusy, setWishlistBusy] = useState(false)
+  const [favoriteBusy, setFavoriteBusy] = useState(false)
 
   const gradientIndex = game.game_id % 6
   const gradients = [
@@ -102,6 +107,32 @@ export default function GameCard(props: GameCardProps) {
     }
   }
 
+  async function toggleFavorite() {
+    if (!isAuthenticated) {
+      navigate('/login')
+      return
+    }
+
+    setFavoriteBusy(true)
+    try {
+      if (favorited) {
+        await removeFromFavorites(game.game_id)
+        setFavorited(false)
+        if (props.variant === 'store') {
+          props.onFavoriteChange?.(game.game_id, false)
+        }
+      } else {
+        await addToFavorites(game.game_id)
+        setFavorited(true)
+        if (props.variant === 'store') {
+          props.onFavoriteChange?.(game.game_id, true)
+        }
+      }
+    } finally {
+      setFavoriteBusy(false)
+    }
+  }
+
   return (
     <Card className="game-card">
       <Link to={`/store/${game.game_id}`} className="game-card-cover-link">
@@ -134,18 +165,34 @@ export default function GameCard(props: GameCardProps) {
               {formatPrice(game.price)}
             </span>
               <div className="game-card-action-buttons">
+                {!props.isOwned && (
+                  <Button
+                    className="game-card-wishlist-btn"
+                    isDisabled={wishlistBusy}
+                    size="sm"
+                    variant={wishlisted ? 'secondary' : 'ghost'}
+                    onPress={toggleWishlist}
+                  >
+                    {wishlisted ? 'Saved' : 'Wishlist'}
+                  </Button>
+                )}
                 <Button
                   className="game-card-wishlist-btn"
-                  isDisabled={wishlistBusy}
+                  isDisabled={favoriteBusy}
                   size="sm"
-                  variant={wishlisted ? 'secondary' : 'ghost'}
-                  onPress={toggleWishlist}
+                  variant={favorited ? 'secondary' : 'ghost'}
+                  onPress={toggleFavorite}
                 >
-                  {wishlisted ? 'Saved' : 'Wishlist'}
+                  {favorited ? 'Fav' : 'Favorite'}
                 </Button>
                 {props.isOwned ? (
-                  <Button className="game-card-cart-btn" size="sm" variant="ghost" isDisabled>
-                    In Library
+                  <Button
+                    className="game-card-cart-btn"
+                    size="sm"
+                    variant="secondary"
+                    onPress={() => navigate(`/play/${game.game_id}`)}
+                  >
+                    Play
                   </Button>
                 ) : inCart ? (
                   <Button className="game-card-cart-btn" size="sm" variant="ghost" isDisabled>

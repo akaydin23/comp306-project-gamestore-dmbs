@@ -3,7 +3,9 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { Button, Card, Chip, Spinner } from '@heroui/react'
 import { getGameById, getLibrary } from '../api/games'
 import { getWishlistIds, addToWishlist, removeFromWishlist } from '../api/wishlist'
+import { getFavoriteIds, addToFavorites, removeFromFavorites } from '../api/favorites'
 import { deleteReview, getGameReviews, saveReview } from '../api/reviews'
+import { sendGift } from '../api/gifts'
 import { useAuth } from '../context/useAuth'
 import { useCart } from '../context/useCart'
 import type { Game, Review } from '../types'
@@ -63,6 +65,7 @@ export default function GameDetailPage() {
   const [error, setError] = useState<string | null>(null)
   const [ownedGameIds, setOwnedGameIds] = useState<Set<number>>(new Set())
   const [wishlistIds, setWishlistIds] = useState<Set<number>>(new Set())
+  const [favoriteIds, setFavoriteIds] = useState<Set<number>>(new Set())
   const [reviews, setReviews] = useState<Review[]>([])
   const [reviewRating, setReviewRating] = useState(5)
   const [reviewComment, setReviewComment] = useState('')
@@ -70,13 +73,20 @@ export default function GameDetailPage() {
   const [reviewError, setReviewError] = useState('')
   const [savingReview, setSavingReview] = useState(false)
   const [wishlistBusy, setWishlistBusy] = useState(false)
+  const [favoriteBusy, setFavoriteBusy] = useState(false)
+  const [giftRecipient, setGiftRecipient] = useState('')
+  const [giftMessage, setGiftMessage] = useState('')
+  const [giftNotice, setGiftNotice] = useState('')
+  const [giftError, setGiftError] = useState('')
+  const [sendingGift, setSendingGift] = useState(false)
 
   useEffect(() => {
     if (isAuthenticated) {
-      Promise.all([getLibrary(), getWishlistIds()])
-        .then(([libraryRes, wishlistRes]) => {
+      Promise.all([getLibrary(), getWishlistIds(), getFavoriteIds()])
+        .then(([libraryRes, wishlistRes, favoriteRes]) => {
           setOwnedGameIds(new Set(libraryRes.library.map((e) => e.game.game_id)))
           setWishlistIds(new Set(wishlistRes.game_ids))
+          setFavoriteIds(new Set(favoriteRes.game_ids))
         })
         .catch(() => {})
     }
@@ -153,6 +163,7 @@ export default function GameDetailPage() {
   const genres = currentGame.genres ?? []
   const ownsGame = ownedGameIds.has(currentGame.game_id)
   const isWishlisted = wishlistIds.has(currentGame.game_id)
+  const isFavorited = favoriteIds.has(currentGame.game_id)
   const ownReview = reviews.find((review) => review.user_id === user?.user_id)
 
   async function toggleWishlist() {
@@ -176,6 +187,52 @@ export default function GameDetailPage() {
       }
     } finally {
       setWishlistBusy(false)
+    }
+  }
+
+  async function toggleFavorite() {
+    if (!isAuthenticated) {
+      navigate('/login')
+      return
+    }
+
+    setFavoriteBusy(true)
+    try {
+      if (isFavorited) {
+        await removeFromFavorites(currentGame.game_id)
+        setFavoriteIds((prev) => {
+          const next = new Set(prev)
+          next.delete(currentGame.game_id)
+          return next
+        })
+      } else {
+        await addToFavorites(currentGame.game_id)
+        setFavoriteIds((prev) => new Set(prev).add(currentGame.game_id))
+      }
+    } finally {
+      setFavoriteBusy(false)
+    }
+  }
+
+  async function handleSendGift() {
+    if (!isAuthenticated) {
+      navigate('/login')
+      return
+    }
+
+    setGiftNotice('')
+    setGiftError('')
+    setSendingGift(true)
+
+    try {
+      await sendGift(giftRecipient.trim(), currentGame.game_id, giftMessage)
+      setGiftRecipient('')
+      setGiftMessage('')
+      setGiftNotice('Gift sent')
+    } catch (err) {
+      setGiftError(err instanceof Error ? err.message : 'Could not send gift')
+    } finally {
+      setSendingGift(false)
     }
   }
 
@@ -281,12 +338,21 @@ export default function GameDetailPage() {
           )}
 
           <div className="detail-actions">
+            {!ownsGame && (
+              <Button
+                isDisabled={wishlistBusy}
+                variant={isWishlisted ? 'secondary' : 'ghost'}
+                onPress={toggleWishlist}
+              >
+                {isWishlisted ? 'Saved to Wishlist' : 'Add to Wishlist'}
+              </Button>
+            )}
             <Button
-              isDisabled={wishlistBusy}
-              variant={isWishlisted ? 'secondary' : 'ghost'}
-              onPress={toggleWishlist}
+              isDisabled={favoriteBusy}
+              variant={isFavorited ? 'secondary' : 'ghost'}
+              onPress={toggleFavorite}
             >
-              {isWishlisted ? 'Saved to Wishlist' : 'Add to Wishlist'}
+              {isFavorited ? 'Favorited' : 'Favorite'}
             </Button>
 
             {ownsGame ? (
@@ -314,6 +380,42 @@ export default function GameDetailPage() {
                 </Button>
               </>
             )}
+          </div>
+        </Card.Content>
+      </Card>
+
+      <Card className="reviews-card">
+        <Card.Header>
+          <Card.Title>Gift This Game</Card.Title>
+        </Card.Header>
+        <Card.Content>
+          <div className="review-form">
+            <div className="review-form-header">
+              <h3>Send to a player</h3>
+            </div>
+            <input
+              placeholder="Recipient username"
+              value={giftRecipient}
+              onChange={(event) => setGiftRecipient(event.target.value)}
+            />
+            <textarea
+              placeholder="Optional message"
+              value={giftMessage}
+              onChange={(event) => setGiftMessage(event.target.value)}
+            />
+            {giftError && <div className="checkout-alert checkout-alert--error">{giftError}</div>}
+            {giftNotice && <div className="checkout-alert checkout-alert--success">{giftNotice}</div>}
+            <div className="review-form-actions">
+              <Button
+                isDisabled={!giftRecipient.trim()}
+                isPending={sendingGift}
+                size="sm"
+                variant="secondary"
+                onPress={handleSendGift}
+              >
+                Send Gift
+              </Button>
+            </div>
           </div>
         </Card.Content>
       </Card>

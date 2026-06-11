@@ -2,6 +2,8 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import { Label, ListBox, SearchField, Select, Spinner } from '@heroui/react'
 import GameCard from '../components/GameCard'
 import { getGames, getGenres, getLibrary } from '../api/games'
+import { getWishlistIds } from '../api/wishlist'
+import { getFavoriteIds } from '../api/favorites'
 import { useAuth } from '../context/useAuth'
 import type { Game, Genre } from '../types'
 
@@ -20,6 +22,8 @@ export default function StorePage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [ownedGameIds, setOwnedGameIds] = useState<Set<number>>(new Set())
+  const [wishlistIds, setWishlistIds] = useState<Set<number>>(new Set())
+  const [favoriteIds, setFavoriteIds] = useState<Set<number>>(new Set())
 
   const [search, setSearch] = useState('')
   const [genre, setGenre] = useState<string | null>(null)
@@ -50,8 +54,12 @@ export default function StorePage() {
 
   useEffect(() => {
     if (isAuthenticated) {
-      getLibrary()
-        .then((res) => setOwnedGameIds(new Set(res.library.map((e) => e.game.game_id))))
+      Promise.all([getLibrary(), getWishlistIds(), getFavoriteIds()])
+        .then(([libraryRes, wishlistRes, favoriteRes]) => {
+          setOwnedGameIds(new Set(libraryRes.library.map((e) => e.game.game_id)))
+          setWishlistIds(new Set(wishlistRes.game_ids))
+          setFavoriteIds(new Set(favoriteRes.game_ids))
+        })
         .catch(() => {})
     }
   }, [isAuthenticated])
@@ -155,7 +163,30 @@ export default function StorePage() {
       {!loading && !error && games.length > 0 && (
         <div className="game-grid">
           {games.map((game) => (
-            <GameCard key={game.game_id} variant="store" game={game} isOwned={ownedGameIds.has(game.game_id)} />
+            <GameCard
+              key={`${game.game_id}-${wishlistIds.has(game.game_id)}-${favoriteIds.has(game.game_id)}`}
+              variant="store"
+              game={game}
+              isOwned={ownedGameIds.has(game.game_id)}
+              initialWishlisted={wishlistIds.has(game.game_id)}
+              initialFavorited={favoriteIds.has(game.game_id)}
+              onWishlistChange={(gameId, wishlisted) => {
+                setWishlistIds((prev) => {
+                  const next = new Set(prev)
+                  if (wishlisted) next.add(gameId)
+                  else next.delete(gameId)
+                  return next
+                })
+              }}
+              onFavoriteChange={(gameId, favorited) => {
+                setFavoriteIds((prev) => {
+                  const next = new Set(prev)
+                  if (favorited) next.add(gameId)
+                  else next.delete(gameId)
+                  return next
+                })
+              }}
+            />
           ))}
         </div>
       )}

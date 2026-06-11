@@ -70,7 +70,7 @@ The schema uses many database constraints instead of relying only on application
 
 ### Sample Data
 
-`database/sample_data.sql` inserts sample users, one developer profile, ten games, genres, game-genre links, wishlist rows, purchases, purchase items, library entries, reviews, favorites, and a gift.
+`database/sample_data.sql` inserts a repeatable realistic demo dataset: 20 users, 4 developer profiles, 32 games, 15 genres, 64 game-genre links, 20 purchases, 41 purchase items, 46 library rows, 29 reviews, 45 wishlist rows, 34 favorite rows, 12 gifts, 10 carts, 20 cart items, and 24 friend relationships.
 
 Important note: `docker-compose.yml` automatically runs `database/schema.sql` when the database container is first created, but it does not automatically load `sample_data.sql`. You should load the sample data manually if you want the frontend store and login tests to have meaningful data.
 
@@ -278,13 +278,9 @@ The currently implemented backend-only or database-only features are:
 
 - There are no automated tests. The backend `npm test` script intentionally exits with an error, and the frontend has no test script.
 - `sample_data.sql` is not automatically loaded by Docker Compose.
-- Checkout is UI-only. Clicking "Proceed to Checkout" does not create a purchase.
-- Wishlists, reviews, favorites, gifts, and purchase history are present in the database but are not fully exposed in the frontend.
-- The frontend has a `HomePage` component that imports `../assets/hero.png`, but that asset was not found in the repository listing, and the component is not currently mounted in the route tree.
-- `CartPage` is reachable only through the navbar when logged in, but the `/cart` route itself is not wrapped in `ProtectedRoute`. If visited while logged out, the cart API will fail with an authentication error and the cart provider silently ignores the failure.
-- The profile update backend exists, but there is no visible frontend form for it.
-- The friends panel can accept pending requests, but the current UI does not include a form for sending new friend requests.
-- `frontend/src/types/index.ts` does not include `wishlist_count`, even though the backend returns it in game summaries. The current UI does not use that field.
+- Checkout, wishlist, review, favorites, gifts, profile editing, admin, and developer screens are implemented, but the flows should still be manually tested with the seeded data before presentation.
+- Gift handling is functional for sending, accepting, rejecting, and cancelling, but it does not yet model a real payment for gifted games.
+- Friends can be created and accepted, but friend removal, request rejection, and block/unblock controls could be expanded.
 - The backend default JWT secret is hardcoded as a fallback. For local development this works, but in a real deployment `JWT_SECRET` should always be set in `.env`.
 - Some source comments have typos and informal wording, but they do not change runtime behavior.
 

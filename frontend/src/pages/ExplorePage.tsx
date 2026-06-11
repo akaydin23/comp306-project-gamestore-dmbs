@@ -1,6 +1,4 @@
-import React, { useState, useEffect } from 'react'
-import { Button, Card, Chip } from '@heroui/react'
-import { useNavigate } from 'react-router-dom'
+import { useCallback, useState, useEffect } from 'react'
 import { useAuth } from '../context/useAuth'
 import GameCard from '../components/GameCard'
 import type { Game } from '../types'
@@ -19,33 +17,34 @@ interface SearchFilters {
   sortBy: 'release_desc' | 'release_asc' | 'price_asc' | 'price_desc' | 'rating_desc'
 }
 
+const DEFAULT_SEARCH_FILTERS: SearchFilters = {
+  searchQuery: '',
+  studioQuery: '',
+  startDate: '',
+  endDate: '',
+  minPrice: 0,
+  maxPrice: 100,
+  isFree: false,
+  minRating: 0,
+  excludeOwned: false,
+  includeWishlistedOnly: false,
+  sortBy: 'release_desc',
+}
+
 export default function ExplorePage() {
-  const navigate = useNavigate()
   const { isAuthenticated } = useAuth()
   
   const [games, setGames] = useState<Game[]>([])
   const [loading, setLoading] = useState<boolean>(false)
   const [error, setError] = useState<string | null>(null)
   
-  const [filters, setFilters] = useState<SearchFilters>({
-    searchQuery: '',
-    studioQuery: '',
-    startDate: '',
-    endDate: '',
-    minPrice: 0,
-    maxPrice: 100,
-    isFree: false,
-    minRating: 0,
-    excludeOwned: false,
-    includeWishlistedOnly: false,
-    sortBy: 'release_desc',
-  })
+  const [filters, setFilters] = useState<SearchFilters>(DEFAULT_SEARCH_FILTERS)
 
   const [activeSqlExplanation, setActiveSqlExplanation] = useState<string>('Select a filter to view SQL translation.')
 
   const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api'
 
-  const executeDatabaseQuery = async (currentFilters: SearchFilters) => {
+  const executeDatabaseQuery = useCallback(async (currentFilters: SearchFilters) => {
     setLoading(true)
     setError(null)
 
@@ -80,18 +79,18 @@ export default function ExplorePage() {
         throw new Error('Failed to retrieve search results.')
       }
 
-      const matchingGames = await response.json()
+      const matchingGames = (await response.json()) as Game[]
       setGames(matchingGames)
-    } catch (err: any) {
-      setError(err.message || 'An unexpected error occurred.')
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'An unexpected error occurred.')
     } finally {
       setLoading(false)
     }
-  }
+  }, [API_URL, isAuthenticated])
 
   useEffect(() => {
-    executeDatabaseQuery(filters)
-  }, [])
+    void Promise.resolve().then(() => executeDatabaseQuery(DEFAULT_SEARCH_FILTERS))
+  }, [executeDatabaseQuery])
 
   const handleFilterUpdate = (updatedFields: Partial<SearchFilters>) => {
     const nextFilters = { ...filters, ...updatedFields }
@@ -123,19 +122,7 @@ export default function ExplorePage() {
   }
 
   const resetFilters = () => {
-    const baseFilters: SearchFilters = {
-      searchQuery: '',
-      studioQuery: '',
-      startDate: '',
-      endDate: '',
-      minPrice: 0,
-      maxPrice: 100,
-      isFree: false,
-      minRating: 0,
-      excludeOwned: false,
-      includeWishlistedOnly: false,
-      sortBy: 'release_desc',
-    }
+    const baseFilters: SearchFilters = DEFAULT_SEARCH_FILTERS
     setFilters(baseFilters)
     setActiveSqlExplanation('SELECT * FROM Games ORDER BY release_date DESC;')
     executeDatabaseQuery(baseFilters)
@@ -293,7 +280,7 @@ export default function ExplorePage() {
                 <label className="block text-xs font-bold text-zinc-400 uppercase tracking-wider">Sort Results</label>
                 <select
                   value={filters.sortBy}
-                  onChange={(e) => handleFilterUpdate({ sortBy: e.target.value as any })}
+                  onChange={(e) => handleFilterUpdate({ sortBy: e.target.value as SearchFilters['sortBy'] })}
                   className="w-full bg-zinc-950 border border-zinc-800 rounded-lg text-xs p-2.5 text-zinc-200 focus:outline-none focus:ring-1 focus:ring-blue-500 font-mono"
                 >
                   <option value="release_desc">Newest Releases</option>

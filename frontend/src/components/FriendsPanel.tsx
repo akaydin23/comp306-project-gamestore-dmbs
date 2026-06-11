@@ -42,7 +42,7 @@ export default function FriendsPanel() {
   }
 
   useEffect(() => {
-    loadSocialData()
+    void Promise.resolve().then(loadSocialData)
   }, [])
 
   const handleSearch = async (e: React.FormEvent) => {

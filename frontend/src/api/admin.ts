@@ -20,6 +20,17 @@ export function getAdminPurchases(): Promise<{ purchases: AdminPurchase[] }> {
   return apiFetch('/admin/purchases')
 }
 
+export function updateAdminUserRole(
+  userId: number,
+  role: AdminUser['role'],
+  studioName: string,
+): Promise<{ user: AdminUser }> {
+  return apiFetch(`/admin/users/${userId}/role`, {
+    method: 'PATCH',
+    body: JSON.stringify({ role, studio_name: studioName }),
+  })
+}
+
 export function createAdminGame(input: AdminGameInput): Promise<{ game: Game }> {
   return apiFetch('/admin/games', {
     method: 'POST',

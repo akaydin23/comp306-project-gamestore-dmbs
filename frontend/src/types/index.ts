@@ -78,6 +78,8 @@ export interface AdminStats {
   review_count: number
   library_count: number
   wishlist_count: number
+  favorite_count: number
+  gift_count: number
   total_revenue: number
   top_games: AdminTopGame[]
 }
@@ -87,9 +89,12 @@ export interface AdminUser {
   username: string
   email: string
   role: User['role']
+  studio_name: string | null
   library_count: number
   review_count: number
   wishlist_count: number
+  favorite_count: number
+  gift_count: number
   total_spent: number
 }
 
@@ -118,4 +123,18 @@ export interface AdminGameInput {
   release_date: string | null
   cover_image_url: string | null
   genre_ids: number[]
+}
+
+export interface Gift {
+  gift_id: number
+  sender_user_id: number
+  sender_username: string
+  recipient_user_id: number
+  recipient_username: string
+  game_id: number
+  game_name: string
+  cover_image_url: string | null
+  gift_date: string
+  gift_message: string | null
+  status: 'PENDING' | 'ACCEPTED' | 'REJECTED' | 'CANCELLED'
 }

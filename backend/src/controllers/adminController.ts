@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import * as adminService from '../services/adminService.js';
-import { AdminGameInput } from '../services/adminService.js';
+import { AdminGameInput, AdminUserRole } from '../services/adminService.js';
 
 function parsePositiveInt(value: unknown): number | null {
   const parsed = Number(value);
@@ -10,6 +10,10 @@ function parsePositiveInt(value: unknown): number | null {
 function parseOptionalPositiveInt(value: unknown): number | null {
   if (value === undefined || value === null || value === '') return null;
   return parsePositiveInt(value);
+}
+
+function parseUserRole(value: unknown): AdminUserRole | null {
+  return value === 'USER' || value === 'ADMIN' || value === 'DEVELOPER' ? value : null;
 }
 
 function parseGameInput(body: Record<string, unknown>): AdminGameInput | null {
@@ -78,6 +82,35 @@ export const getPurchases = async (
   try {
     const purchases = await adminService.getPurchases();
     res.json({ purchases });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const updateUserRole = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> => {
+  try {
+    const userId = parsePositiveInt(req.params.userId);
+    const role = parseUserRole(req.body.role);
+    const studioName = typeof req.body.studio_name === 'string' && req.body.studio_name.trim() !== ''
+      ? req.body.studio_name.trim()
+      : null;
+
+    if (!userId) {
+      res.status(400).json({ error: { message: 'userId must be a positive integer' } });
+      return;
+    }
+
+    if (!role) {
+      res.status(400).json({ error: { message: 'role must be USER, ADMIN, or DEVELOPER' } });
+      return;
+    }
+
+    const user = await adminService.updateUserRole(userId, role, studioName);
+    res.json({ user });
   } catch (err) {
     next(err);
   }

@@ -133,7 +133,7 @@ After the database is running, load the sample data from the repository root:
 Get-Content .\database\sample_data.sql | docker compose exec -T db psql -U postgres -d game_store_db
 ```
 
-If you accidentally run this twice, duplicate key errors are expected because the sample rows use fixed unique emails, usernames, game IDs through serial order, and relationship keys.
+The seed script resets the demo tables first, so it is safe to run again when you want to restore the standard demo dataset.
 
 Verify sample data:
 
@@ -144,8 +144,14 @@ docker compose exec db psql -U postgres -d game_store_db -c "SELECT COUNT(*) FRO
 
 Expected result after loading sample data:
 
-- `Users` count should be `6`.
-- `Games` count should be `10`.
+- `Users` count should be `20`.
+- `Games` count should be `32`.
+- `Purchases` count should be `20`.
+- `Library` count should be `46`.
+- `Reviews` count should be `29`.
+- `Wishlists` count should be `45`.
+- `Favorites` count should be `34`.
+- `Gifts` count should be `12`.
 
 ## 7. Install Backend Dependencies
 

@@ -565,6 +565,7 @@ body {
 
 .profile-form input,
 .profile-form textarea,
+.review-form input,
 .review-form textarea,
 .review-form select {
   border: 1px solid oklch(0.3 0.006 286);
@@ -583,6 +584,7 @@ body {
 
 .profile-form input:focus,
 .profile-form textarea:focus,
+.review-form input:focus,
 .review-form textarea:focus,
 .review-form select:focus {
   border-color: var(--accent);
@@ -1366,7 +1368,7 @@ body {
 
 .admin-stat-grid {
   display: grid;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   gap: 0.75rem;
 }
 
@@ -1415,7 +1417,9 @@ body {
 .admin-form input,
 .admin-form textarea,
 .admin-form select,
-.admin-genre-form input {
+.admin-genre-form input,
+.admin-inline-input,
+.admin-inline-select {
   width: 100%;
   border: 1px solid oklch(0.3 0.006 286);
   border-radius: 0.6rem;
@@ -1433,8 +1437,17 @@ body {
 .admin-form input:focus,
 .admin-form textarea:focus,
 .admin-form select:focus,
-.admin-genre-form input:focus {
+.admin-genre-form input:focus,
+.admin-inline-input:focus,
+.admin-inline-select:focus {
   border-color: var(--accent);
+}
+
+.admin-inline-input,
+.admin-inline-select {
+  min-width: 9rem;
+  padding: 0.5rem 0.6rem;
+  font-size: 0.82rem;
 }
 
 .admin-genre-picker {

@@ -11,6 +11,7 @@ import {
   getUsers,
   updateGame,
   updateGenre,
+  updateUserRole,
 } from '../controllers/adminController.js';
 
 const router = Router();
@@ -20,6 +21,7 @@ router.use(authMiddleware, adminMiddleware);
 router.get('/stats', getStats);
 router.get('/users', getUsers);
 router.get('/purchases', getPurchases);
+router.patch('/users/:userId/role', updateUserRole);
 
 router.post('/games', createGame);
 router.put('/games/:gameId', updateGame);

@@ -23,8 +23,11 @@ export default function Navbar() {
           <NavLink to="/explore">Explore Engine</NavLink> 
           {isAuthenticated && <NavLink to="/library">Library</NavLink>}
           {isAuthenticated && <NavLink to="/wishlist">Wishlist</NavLink>}
+          {isAuthenticated && <NavLink to="/favorites">Favorites</NavLink>}
+          {isAuthenticated && <NavLink to="/gifts">Gifts</NavLink>}
           {isAuthenticated && <NavLink to="/dashboard">Friends</NavLink>}
           {user?.role === 'ADMIN' && <NavLink to="/admin">Admin</NavLink>}
+          {user?.role === 'DEVELOPER' && <NavLink to="/developer">Developer</NavLink>}
         </div>
 
         <div className="navbar-actions">

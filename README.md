@@ -24,19 +24,23 @@ The application is designed to showcase core DBMS concepts: primary and foreign 
 - Game store browsing with search, genre filter, and sorting
 - Game detail pages
 - Shopping cart (add, remove, clear)
+- Checkout and purchase flow
 - Owned-game library with play-time stats
-- User dashboard and friends panel (view/accept requests)
+- Wishlist, favorites, reviews, and gifts
+- User dashboard and friends panel (send/view/accept requests)
+- Profile editing
+- Admin dashboard for users, roles, games, genres, purchases, and reports
+- Developer dashboard for managing developer-owned games
+- Realistic demo seed data for meaningful SQL query outputs
 - REST API with layered backend architecture
 
 ### In Progress / Database Only
 
-These are modeled in the schema and/or sample data but not fully wired through the UI:
+These are modeled in the schema and have partial or basic behavior, but could be expanded further:
 
-- Checkout and purchase flow
-- Wishlists, reviews, favorites, and gifts
-- Profile editing UI
-- Sending friend requests from the frontend
-- Admin and developer-specific screens
+- Advanced gift purchase/payment handling
+- Friend removal, request rejection, and block/unblock controls
+- More detailed developer analytics
 
 See [docs/project-explanation.md](./docs/project-explanation.md) for the full architecture breakdown and current limitations.
 
