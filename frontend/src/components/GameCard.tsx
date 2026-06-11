@@ -1,4 +1,4 @@
-import { Card, Chip, Button } from '@heroui/react'
+import { Button, Card, Chip } from '@heroui/react'
 import { useNavigate, Link } from 'react-router-dom'
 import { useAuth } from '../context/useAuth'
 import { useCart } from '../context/useCart'
@@ -179,7 +179,7 @@ export default function GameCard(props: GameCardProps) {
                   : 'Added to library'}
               </span>
             </div>
-            <Button className="game-card-play-btn" size="sm">
+            <Button className="game-card-play-btn" size="sm" onPress={() => navigate(`/play/${game.game_id}`)}>
               Play
             </Button>
           </div>

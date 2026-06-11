@@ -290,7 +290,7 @@ export default function GameDetailPage() {
             </Button>
 
             {ownsGame ? (
-              <Button variant="secondary" className="ml-auto">
+              <Button variant="secondary" className="ml-auto" onPress={() => navigate(`/play/${game.game_id}`)}>
                 Play
               </Button>
             ) : isInCart(game.game_id) ? (

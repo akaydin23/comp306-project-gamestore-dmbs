@@ -14,6 +14,7 @@ import LibraryPage from './pages/LibraryPage'
 import CartPage from './pages/CartPage'
 import DashboardPage from './pages/DashboardPage'
 import WishlistPage from './pages/WishlistPage'
+import PlayPage from './pages/PlayPage'
 
 function PublicRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isLoading } = useAuth()
@@ -103,6 +104,14 @@ function AppRoutes() {
           element={
             <ProtectedRoute>
               <DashboardPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/play/:gameId"
+          element={
+            <ProtectedRoute>
+              <PlayPage />
             </ProtectedRoute>
           }
         />
