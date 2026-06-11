@@ -34,6 +34,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [],
   )
 
+  const updateProfile = useCallback(
+    async (username: string, bio: string, profileImageUrl: string) => {
+      const res = await authApi.updateProfile(username.trim(), bio.trim(), profileImageUrl.trim())
+      setUser(res.user)
+    },
+    [],
+  )
+
   const logout = useCallback(() => {
     localStorage.removeItem('token')
     setUser(null)
@@ -41,7 +49,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{ user, isAuthenticated: user !== null, isLoading, login, register, logout }}
+      value={{
+        user,
+        isAuthenticated: user !== null,
+        isLoading,
+        login,
+        register,
+        updateProfile,
+        logout,
+      }}
     >
       {children}
     </AuthContext.Provider>

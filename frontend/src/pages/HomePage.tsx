@@ -3,9 +3,9 @@ import BrandLogo from '../components/BrandLogo'
 import heroImage from '../assets/hero.png'
 
 const highlights = [
-  { label: 'Browse', value: 'Store' },
-  { label: 'Track', value: 'Library' },
-  { label: 'Save', value: 'Wishlist' },
+  { label: 'Browse', value: 'Store', to: '/store' },
+  { label: 'Track', value: 'Library', to: '/library' },
+  { label: 'Connect', value: 'Friends', to: '/dashboard' },
 ]
 
 export default function HomePage() {
@@ -29,29 +29,29 @@ export default function HomePage() {
             <p className="home-eyebrow">GameStore</p>
             <h1>Your game library starts here.</h1>
             <p className="home-subtitle">
-              Browse games, manage your wishlist, review purchases, and keep your
-              profile in one place.
+              Browse games, manage your cart and library, and connect with friends
+              from one focused store experience.
             </p>
             <div className="home-actions">
-              <Link to="/register" className="home-action home-action-primary">
-                Create account
+              <Link to="/store" className="home-action home-action-primary">
+                Browse Store
               </Link>
-              <Link to="/login" className="home-action home-action-secondary">
-                Sign in
+              <Link to="/register" className="home-action home-action-secondary">
+                Create account
               </Link>
             </div>
           </div>
 
-          <div className="home-showcase animate-in-delay-2" aria-hidden="true">
+          <div className="home-showcase animate-in-delay-2">
             <div className="home-art-card">
-              <img src={heroImage} alt="" className="home-art" />
+              <img src={heroImage} alt="" className="home-art" aria-hidden="true" />
             </div>
             <div className="home-highlights">
               {highlights.map((item) => (
-                <div className="home-highlight" key={item.label}>
+                <Link className="home-highlight" key={item.label} to={item.to}>
                   <span>{item.label}</span>
                   <strong>{item.value}</strong>
-                </div>
+                </Link>
               ))}
             </div>
           </div>

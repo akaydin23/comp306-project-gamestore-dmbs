@@ -1,9 +1,16 @@
+import { useState, type SyntheticEvent } from 'react'
 import { Button, Card } from '@heroui/react'
 import { useAuth } from '../context/useAuth'
-import FriendsPanel from '../components/FriendsPanel';
+import FriendsPanel from '../components/FriendsPanel'
 
 export default function DashboardPage() {
-  const { user, logout } = useAuth()
+  const { user, logout, updateProfile } = useAuth()
+  const [username, setUsername] = useState(user?.username ?? '')
+  const [bio, setBio] = useState(user?.bio ?? '')
+  const [profileImageUrl, setProfileImageUrl] = useState(user?.profile_image_url ?? '')
+  const [profileMessage, setProfileMessage] = useState('')
+  const [profileError, setProfileError] = useState('')
+  const [savingProfile, setSavingProfile] = useState(false)
 
   if (!user) return null
 
@@ -29,7 +36,13 @@ export default function DashboardPage() {
         <Card className="animate-in-delay-1">
           <Card.Content>
             <div className="dashboard-header">
-              <div className="dashboard-avatar">{initials}</div>
+              <div className="dashboard-avatar">
+                {user.profile_image_url && user.profile_image_url !== 'default.jpg' ? (
+                  <img src={user.profile_image_url} alt="" />
+                ) : (
+                  initials
+                )}
+              </div>
               <div className="dashboard-info">
                 <h2>{user.username}</h2>
                 <p>{user.email}</p>
@@ -49,7 +62,57 @@ export default function DashboardPage() {
               </div>
             </div>
 
-            <div style={{ marginTop: '20px', borderTop: '1px solid #2a475e', paddingTop: '20px' }}>
+            <form
+              className="profile-form"
+              onSubmit={async (e: SyntheticEvent<HTMLFormElement>) => {
+                e.preventDefault()
+                setProfileMessage('')
+                setProfileError('')
+                setSavingProfile(true)
+
+                try {
+                  await updateProfile(username, bio, profileImageUrl || 'default.jpg')
+                  setProfileMessage('Profile updated')
+                } catch (err) {
+                  setProfileError(err instanceof Error ? err.message : 'Could not update profile')
+                } finally {
+                  setSavingProfile(false)
+                }
+              }}
+            >
+              <div className="profile-form-header">
+                <h3>Edit Profile</h3>
+              </div>
+              <label>
+                Username
+                <input value={username} onChange={(e) => setUsername(e.target.value)} />
+              </label>
+              <label>
+                Bio
+                <textarea value={bio} onChange={(e) => setBio(e.target.value)} />
+              </label>
+              <label>
+                Profile image URL
+                <input
+                  value={profileImageUrl}
+                  placeholder="https://..."
+                  onChange={(e) => setProfileImageUrl(e.target.value)}
+                />
+              </label>
+              {profileError && <div className="checkout-alert checkout-alert--error">{profileError}</div>}
+              {profileMessage && <div className="checkout-alert checkout-alert--success">{profileMessage}</div>}
+              <Button
+                className="profile-save"
+                isDisabled={!username.trim()}
+                isPending={savingProfile}
+                type="submit"
+                variant="secondary"
+              >
+                Save Profile
+              </Button>
+            </form>
+
+            <div className="dashboard-friends">
               <FriendsPanel />
             </div>
           </Card.Content>

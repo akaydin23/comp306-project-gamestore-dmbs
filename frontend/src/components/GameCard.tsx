@@ -2,10 +2,17 @@ import { Card, Chip, Button } from '@heroui/react'
 import { useNavigate, Link } from 'react-router-dom'
 import { useAuth } from '../context/useAuth'
 import { useCart } from '../context/useCart'
+import { addToWishlist, removeFromWishlist } from '../api/wishlist'
 import type { Game } from '../types'
+import { useState } from 'react'
 
 type GameCardProps =
-  | { variant: 'store'; game: Game }
+  | {
+      variant: 'store'
+      game: Game
+      initialWishlisted?: boolean
+      onWishlistChange?: (gameId: number, wishlisted: boolean) => void
+    }
   | { variant: 'library'; game: Game; hoursPlayed: number; purchaseDate: string | null }
 
 const TAG_COLORS: Record<string, string> = {
@@ -50,6 +57,10 @@ export default function GameCard(props: GameCardProps) {
   const { isAuthenticated } = useAuth()
   const { isInCart, addToCart } = useCart()
   const navigate = useNavigate()
+  const [wishlisted, setWishlisted] = useState(
+    variant === 'store' ? Boolean(props.initialWishlisted) : false,
+  )
+  const [wishlistBusy, setWishlistBusy] = useState(false)
 
   const gradientIndex = game.game_id % 6
   const gradients = [
@@ -63,6 +74,32 @@ export default function GameCard(props: GameCardProps) {
 
   const genres = game.genres ?? []
   const inCart = isInCart(game.game_id)
+
+  async function toggleWishlist() {
+    if (!isAuthenticated) {
+      navigate('/login')
+      return
+    }
+
+    setWishlistBusy(true)
+    try {
+      if (wishlisted) {
+        await removeFromWishlist(game.game_id)
+        setWishlisted(false)
+        if (props.variant === 'store') {
+          props.onWishlistChange?.(game.game_id, false)
+        }
+      } else {
+        await addToWishlist(game.game_id)
+        setWishlisted(true)
+        if (props.variant === 'store') {
+          props.onWishlistChange?.(game.game_id, true)
+        }
+      }
+    } finally {
+      setWishlistBusy(false)
+    }
+  }
 
   return (
     <Card className="game-card">
@@ -95,26 +132,37 @@ export default function GameCard(props: GameCardProps) {
             <span className="game-card-price">
               {formatPrice(game.price)}
             </span>
-            {inCart ? (
-              <Button className="game-card-cart-btn" size="sm" variant="ghost" isDisabled>
-                In Cart
-              </Button>
-            ) : (
+            <div className="game-card-action-buttons">
               <Button
-                className="game-card-cart-btn"
+                className="game-card-wishlist-btn"
+                isDisabled={wishlistBusy}
                 size="sm"
-                variant="secondary"
-                onPress={() => {
-                  if (isAuthenticated) {
-                    addToCart(game.game_id)
-                  } else {
-                    navigate('/login')
-                  }
-                }}
+                variant={wishlisted ? 'secondary' : 'ghost'}
+                onPress={toggleWishlist}
               >
-                Add to Cart
+                {wishlisted ? 'Saved' : 'Wishlist'}
               </Button>
-            )}
+              {inCart ? (
+                <Button className="game-card-cart-btn" size="sm" variant="ghost" isDisabled>
+                  In Cart
+                </Button>
+              ) : (
+                <Button
+                  className="game-card-cart-btn"
+                  size="sm"
+                  variant="secondary"
+                  onPress={() => {
+                    if (isAuthenticated) {
+                      addToCart(game.game_id)
+                    } else {
+                      navigate('/login')
+                    }
+                  }}
+                >
+                  Add to Cart
+                </Button>
+              )}
+            </div>
           </div>
         ) : (
           <div className="game-card-actions">

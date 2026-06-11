@@ -25,3 +25,14 @@ export function login(
 export function getMe(): Promise<UserResponse> {
   return apiFetch('/auth/me')
 }
+
+export function updateProfile(
+  username: string,
+  bio: string,
+  profile_image_url: string,
+): Promise<UserResponse> {
+  return apiFetch('/users/me', {
+    method: 'PUT',
+    body: JSON.stringify({ username, bio, profile_image_url }),
+  })
+}

@@ -2,6 +2,7 @@ import { NavLink, Link } from 'react-router-dom'
 import { Button, Dropdown } from '@heroui/react'
 import { useAuth } from '../context/useAuth'
 import { useCart } from '../context/useCart'
+import BrandLogo from './BrandLogo'
 
 export default function Navbar() {
   const { user, isAuthenticated, logout } = useAuth()
@@ -12,13 +13,15 @@ export default function Navbar() {
   return (
     <nav className="navbar">
       <div className="navbar-content">
-        <NavLink to="/" className="navbar-brand">
-          Game<span>Store</span>
+        <NavLink to="/store" className="navbar-brand" aria-label="GameStore store">
+          <BrandLogo className="navbar-brand-mark" />
+          <span className="navbar-brand-text">Game<span>Store</span></span>
         </NavLink>
 
         <div className="navbar-links">
-          <NavLink to="/" end>Store</NavLink>
+          <NavLink to="/store">Store</NavLink>
           {isAuthenticated && <NavLink to="/library">Library</NavLink>}
+          {isAuthenticated && <NavLink to="/wishlist">Wishlist</NavLink>}
           {isAuthenticated && <NavLink to="/dashboard">Friends</NavLink>}
         </div>
 

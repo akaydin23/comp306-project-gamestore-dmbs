@@ -3,6 +3,7 @@ export interface User {
   username: string
   email: string
   bio: string | null
+  profile_image_url: string
   role: 'USER' | 'ADMIN' | 'DEVELOPER'
 }
 
@@ -33,6 +34,7 @@ export interface Game {
   genres: string[] | null
   average_rating: number | null
   review_count: number
+  wishlist_count: number
 }
 
 export interface LibraryEntry {
@@ -44,4 +46,20 @@ export interface LibraryEntry {
 export interface Genre {
   genre_id: number
   genre_name: string
+}
+
+export interface Review {
+  review_id: number
+  user_id: number
+  username: string
+  game_id: number
+  rating: number
+  comment: string | null
+  review_date: string
+}
+
+export interface CheckoutResult {
+  purchase_id: number
+  total_price: number
+  item_count: number
 }

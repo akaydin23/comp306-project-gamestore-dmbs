@@ -2,9 +2,11 @@ import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { Button, Card, Chip, Spinner } from '@heroui/react'
 import { getGameById, getLibrary } from '../api/games'
+import { getWishlistIds, addToWishlist, removeFromWishlist } from '../api/wishlist'
+import { deleteReview, getGameReviews, saveReview } from '../api/reviews'
 import { useAuth } from '../context/useAuth'
 import { useCart } from '../context/useCart'
-import type { Game } from '../types'
+import type { Game, Review } from '../types'
 
 const TAG_COLORS: Record<string, string> = {
   Action: 'bg-cyan-500/20 text-cyan-400',
@@ -53,19 +55,28 @@ function formatPrice(price: number) {
 export default function GameDetailPage() {
   const { gameId } = useParams<{ gameId: string }>()
   const navigate = useNavigate()
-  const { isAuthenticated } = useAuth()
+  const { isAuthenticated, user } = useAuth()
   const { isInCart, addToCart } = useCart()
 
   const [game, setGame] = useState<Game | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [ownedGameIds, setOwnedGameIds] = useState<Set<number>>(new Set())
+  const [wishlistIds, setWishlistIds] = useState<Set<number>>(new Set())
+  const [reviews, setReviews] = useState<Review[]>([])
+  const [reviewRating, setReviewRating] = useState(5)
+  const [reviewComment, setReviewComment] = useState('')
+  const [reviewMessage, setReviewMessage] = useState('')
+  const [reviewError, setReviewError] = useState('')
+  const [savingReview, setSavingReview] = useState(false)
+  const [wishlistBusy, setWishlistBusy] = useState(false)
 
   useEffect(() => {
     if (isAuthenticated) {
-      getLibrary()
-        .then((res) => {
-          setOwnedGameIds(new Set(res.library.map((e) => e.game.game_id)))
+      Promise.all([getLibrary(), getWishlistIds()])
+        .then(([libraryRes, wishlistRes]) => {
+          setOwnedGameIds(new Set(libraryRes.library.map((e) => e.game.game_id)))
+          setWishlistIds(new Set(wishlistRes.game_ids))
         })
         .catch(() => {})
     }
@@ -79,12 +90,23 @@ export default function GameDetailPage() {
       .then((res) => setGame(res.game))
       .catch((err) => setError(err instanceof Error ? err.message : 'Failed to load game'))
       .finally(() => setLoading(false))
-  }, [gameId])
+
+    getGameReviews(id)
+      .then((res) => {
+        setReviews(res.reviews)
+        const own = res.reviews.find((review) => review.user_id === user?.user_id)
+        if (own) {
+          setReviewRating(own.rating)
+          setReviewComment(own.comment ?? '')
+        }
+      })
+      .catch(() => {})
+  }, [gameId, user?.user_id])
 
   if (!gameId || !Number.isInteger(Number(gameId)) || Number(gameId) <= 0) {
     return (
       <div className="page-content">
-        <Button variant="secondary" size="sm" onPress={() => navigate('/')}>
+        <Button variant="secondary" size="sm" onPress={() => navigate('/store')}>
           ← Back to Store
         </Button>
         <div className="empty-state">
@@ -117,7 +139,8 @@ export default function GameDetailPage() {
     )
   }
 
-  const gradientIndex = game.game_id % 6
+  const currentGame = game
+  const gradientIndex = currentGame.game_id % 6
   const gradients = [
     'from-violet-600 to-indigo-700',
     'from-cyan-600 to-blue-700',
@@ -127,7 +150,78 @@ export default function GameDetailPage() {
     'from-blue-600 to-purple-700',
   ]
 
-  const genres = game.genres ?? []
+  const genres = currentGame.genres ?? []
+  const ownsGame = ownedGameIds.has(currentGame.game_id)
+  const isWishlisted = wishlistIds.has(currentGame.game_id)
+  const ownReview = reviews.find((review) => review.user_id === user?.user_id)
+
+  async function toggleWishlist() {
+    if (!isAuthenticated) {
+      navigate('/login')
+      return
+    }
+
+    setWishlistBusy(true)
+    try {
+      if (isWishlisted) {
+        await removeFromWishlist(currentGame.game_id)
+        setWishlistIds((prev) => {
+          const next = new Set(prev)
+          next.delete(currentGame.game_id)
+          return next
+        })
+      } else {
+        await addToWishlist(currentGame.game_id)
+        setWishlistIds((prev) => new Set(prev).add(currentGame.game_id))
+      }
+    } finally {
+      setWishlistBusy(false)
+    }
+  }
+
+  async function handleSaveReview() {
+    setReviewMessage('')
+    setReviewError('')
+    setSavingReview(true)
+
+    try {
+      await saveReview(currentGame.game_id, reviewRating, reviewComment)
+      const [reviewsRes, gameRes] = await Promise.all([
+        getGameReviews(currentGame.game_id),
+        getGameById(currentGame.game_id),
+      ])
+      setReviews(reviewsRes.reviews)
+      setGame(gameRes.game)
+      setReviewMessage('Review saved')
+    } catch (err) {
+      setReviewError(err instanceof Error ? err.message : 'Could not save review')
+    } finally {
+      setSavingReview(false)
+    }
+  }
+
+  async function handleDeleteReview() {
+    setReviewMessage('')
+    setReviewError('')
+    setSavingReview(true)
+
+    try {
+      await deleteReview(currentGame.game_id)
+      const [reviewsRes, gameRes] = await Promise.all([
+        getGameReviews(currentGame.game_id),
+        getGameById(currentGame.game_id),
+      ])
+      setReviews(reviewsRes.reviews)
+      setGame(gameRes.game)
+      setReviewComment('')
+      setReviewRating(5)
+      setReviewMessage('Review deleted')
+    } catch (err) {
+      setReviewError(err instanceof Error ? err.message : 'Could not delete review')
+    } finally {
+      setSavingReview(false)
+    }
+  }
 
   return (
     <div className="page-content">
@@ -135,7 +229,7 @@ export default function GameDetailPage() {
         className="detail-back"
         size="sm"
         variant="secondary"
-        onPress={() => navigate('/')}
+        onPress={() => navigate('/store')}
       >
         ← Back to Store
       </Button>
@@ -187,7 +281,15 @@ export default function GameDetailPage() {
           )}
 
           <div className="detail-actions">
-            {ownedGameIds.has(game.game_id) ? (
+            <Button
+              isDisabled={wishlistBusy}
+              variant={isWishlisted ? 'secondary' : 'ghost'}
+              onPress={toggleWishlist}
+            >
+              {isWishlisted ? 'Saved to Wishlist' : 'Add to Wishlist'}
+            </Button>
+
+            {ownsGame ? (
               <Button variant="secondary" className="ml-auto">
                 Play
               </Button>
@@ -211,6 +313,82 @@ export default function GameDetailPage() {
                   Add to Cart
                 </Button>
               </>
+            )}
+          </div>
+        </Card.Content>
+      </Card>
+
+      <Card className="reviews-card">
+        <Card.Header>
+          <Card.Title>Reviews</Card.Title>
+        </Card.Header>
+        <Card.Content className="reviews-content">
+          {isAuthenticated && ownsGame && (
+            <div className="review-form">
+              <div className="review-form-header">
+                <h3>{ownReview ? 'Update your review' : 'Write a review'}</h3>
+                <select
+                  value={reviewRating}
+                  onChange={(e) => setReviewRating(Number(e.target.value))}
+                >
+                  {[5, 4, 3, 2, 1].map((rating) => (
+                    <option key={rating} value={rating}>
+                      {rating} star{rating !== 1 ? 's' : ''}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <textarea
+                placeholder="What did you think about this game?"
+                value={reviewComment}
+                onChange={(e) => setReviewComment(e.target.value)}
+              />
+              {reviewError && <div className="checkout-alert checkout-alert--error">{reviewError}</div>}
+              {reviewMessage && <div className="checkout-alert checkout-alert--success">{reviewMessage}</div>}
+              <div className="review-form-actions">
+                {ownReview && (
+                  <Button
+                    isDisabled={savingReview}
+                    size="sm"
+                    variant="danger"
+                    onPress={handleDeleteReview}
+                  >
+                    Delete
+                  </Button>
+                )}
+                <Button
+                  isPending={savingReview}
+                  size="sm"
+                  variant="secondary"
+                  onPress={handleSaveReview}
+                >
+                  Save Review
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {isAuthenticated && !ownsGame && (
+            <p className="reviews-note">Buy this game to write a review.</p>
+          )}
+
+          {!isAuthenticated && (
+            <p className="reviews-note">Sign in to review games you own.</p>
+          )}
+
+          <div className="reviews-list">
+            {reviews.length === 0 ? (
+              <p className="reviews-note">No reviews yet.</p>
+            ) : (
+              reviews.map((review) => (
+                <div className="review-item" key={review.review_id}>
+                  <div className="review-item-header">
+                    <strong>{review.username}</strong>
+                    <span>{'★'.repeat(review.rating)}{'☆'.repeat(5 - review.rating)}</span>
+                  </div>
+                  {review.comment && <p>{review.comment}</p>}
+                </div>
+              ))
             )}
           </div>
         </Card.Content>

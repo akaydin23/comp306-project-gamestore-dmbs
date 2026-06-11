@@ -32,7 +32,7 @@ export async function registerUser(
   const result = await pool.query<User>(
     `INSERT INTO Users (username, email, password_hash)
      VALUES ($1, $2, $3)
-     RETURNING user_id, username, email, bio, role`,
+     RETURNING user_id, username, email, bio, profile_image_url, role`,
     [username, email, password_hash],
   );
 
@@ -44,7 +44,7 @@ export async function loginUser(
   password: string,
 ): Promise<{ user: SafeUser; token: string }> {
   const result = await pool.query<User>(
-    'SELECT user_id, username, email, password_hash, bio, role FROM Users WHERE email = $1',
+    'SELECT user_id, username, email, password_hash, bio, profile_image_url, role FROM Users WHERE email = $1',
     [email],
   );
 
@@ -76,7 +76,7 @@ export async function loginUser(
 
 export async function getUserById(userId: number): Promise<SafeUser> {
   const result = await pool.query<User>(
-    'SELECT user_id, username, email, bio, role FROM Users WHERE user_id = $1',
+    'SELECT user_id, username, email, bio, profile_image_url, role FROM Users WHERE user_id = $1',
     [userId],
   );
 

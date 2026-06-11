@@ -1,6 +1,8 @@
-import { Link } from 'react-router-dom'
+import { useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
 import { Button, Card, Chip, CloseButton, Spinner } from '@heroui/react'
 import { useCart } from '../context/useCart'
+import { checkoutCart } from '../api/checkout'
 
 const TAG_COLORS: Record<string, string> = {
   Action: 'bg-cyan-500/20 text-cyan-400',
@@ -39,11 +41,32 @@ function coverGradient(id: number) {
 }
 
 export default function CartPage() {
+  const navigate = useNavigate()
   const { items, loading, removeFromCart, clearCart } = useCart()
+  const [checkingOut, setCheckingOut] = useState(false)
+  const [checkoutMessage, setCheckoutMessage] = useState('')
+  const [checkoutError, setCheckoutError] = useState('')
 
   const subtotal = items.reduce((sum, i) => sum + i.game.price, 0)
   const tax = subtotal * 0.08
   const total = subtotal + tax
+
+  async function handleCheckout() {
+    setCheckoutMessage('')
+    setCheckoutError('')
+    setCheckingOut(true)
+
+    try {
+      const res = await checkoutCart()
+      await clearCart()
+      setCheckoutMessage(`Purchase #${res.purchase.purchase_id} completed.`)
+      navigate('/library')
+    } catch (err) {
+      setCheckoutError(err instanceof Error ? err.message : 'Checkout failed')
+    } finally {
+      setCheckingOut(false)
+    }
+  }
 
   if (loading) {
     return (
@@ -65,7 +88,7 @@ export default function CartPage() {
           </div>
           <h2 className="cart-empty-title">Your cart is empty</h2>
           <p className="cart-empty-desc">Looks like you haven&apos;t added anything yet.</p>
-          <Link to="/">
+          <Link to="/store">
             <Button variant="secondary" size="lg">Browse Games</Button>
           </Link>
         </div>
@@ -153,8 +176,15 @@ export default function CartPage() {
               </div>
             </Card.Content>
             <Card.Footer className="cart-summary-footer">
-              <Button className="w-full" size="lg">
-                Proceed to Checkout
+              {checkoutError && <div className="checkout-alert checkout-alert--error">{checkoutError}</div>}
+              {checkoutMessage && <div className="checkout-alert checkout-alert--success">{checkoutMessage}</div>}
+              <Button
+                className="w-full"
+                isPending={checkingOut}
+                size="lg"
+                onPress={handleCheckout}
+              >
+                {checkingOut ? 'Processing...' : 'Proceed to Checkout'}
               </Button>
               <Button
                 className="w-full"

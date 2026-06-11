@@ -4,6 +4,7 @@ export interface User {
   email: string;
   password_hash: string;
   bio: string | null;
+  profile_image_url: string;
   role: 'USER' | 'ADMIN' | 'DEVELOPER';
 }
 
@@ -52,4 +53,14 @@ export interface LibraryEntry {
 export interface CartItem {
   game: GameSummary;
   added_at: string;
+}
+
+export interface Review {
+  review_id: number;
+  user_id: number;
+  username: string;
+  game_id: number;
+  rating: number;
+  comment: string | null;
+  review_date: string;
 }

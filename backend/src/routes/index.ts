@@ -7,6 +7,9 @@ import userRoutes from './user.js';
 import libraryRouter from './library.js';
 import cartRouter from './cart.js';
 import friendsRouter from './friends.js';
+import checkoutRouter from './checkout.js';
+import wishlistRouter from './wishlist.js';
+import reviewsRouter from './reviews.js';
 
 const router: Router = Router();
 
@@ -22,5 +25,8 @@ router.use('/users', userRoutes);
 router.use('/library', libraryRouter);
 router.use('/cart', cartRouter);
 router.use('/friends', friendsRouter);
+router.use('/checkout', checkoutRouter);
+router.use('/wishlist', wishlistRouter);
+router.use('/reviews', reviewsRouter);
 
 export default router;
